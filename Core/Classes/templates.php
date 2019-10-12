@@ -90,8 +90,7 @@ class oPage
 		foreach ($_GET as $key => $value) {
 			if (gettype($value) === "string") {
 				$this->GetVars[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
-			}
-			else {
+			} else {
 				$this->GetVars[$key] = $value;
 			}
 		}
@@ -100,8 +99,7 @@ class oPage
 		foreach ($_POST as $key => $value) {
 			if (gettype($value) === "string") {
 				$this->PostVars[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
-			}
-			else {
+			} else {
 				$this->PostVars[$key] = $value;
 			}
 		}
@@ -167,6 +165,26 @@ class oPage
 		echo $this->Site;
 	}
 
+	public function HandleSiteIncludes(callable $getFileContentsFunc) {
+		preg_match_all("/<!-- INCLUDE:(.+) -->/i", $this->Site, $matches);
+		if (isset($matches) === true && count($matches) > 1) {
+			foreach ($matches[1] as $match => $value) {
+				$escapedVal = preg_quote($value, '/');
+				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc("./App/Views/$value"), $this->Site);
+			}
+		}
+	}
+
+	public function HandlePageIncludes(callable $getFileContentsFunc) {
+		preg_match_all("/<!-- INCLUDE:(.+) -->/i", $this->Site, $matches);
+		if (isset($matches) === true && count($matches) > 1) {
+			foreach ($matches[1] as $match => $value) {
+				$escapedVal = preg_quote($value, '/');
+				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc("./App/Views/$value"), $this->Content);
+			}
+		}
+	}
+
 	function GetSection($sectionId)
 	{
 		return GetContentSection($sectionId, $this->Content);
@@ -210,7 +228,7 @@ class oPage
 
 function ValueReplace($find, $replace, $template)
 {
-	return preg_replace("/<!-- $find -->/i", $replace, $template);
+	return preg_replace("/<!-- " . $find . " -->/i", $replace, $template);
 }
 
 function ArrayReplace($array, $template)

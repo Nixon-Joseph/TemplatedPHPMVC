@@ -21,21 +21,41 @@ abstract class Controller {
         }
     }
     public abstract function index();
-    public function view (string $view = ACTION_NAME) {
+    public function view (string $view = ACTION_NAME, string $master = "_layout", mixed $model = null) {
         require "./Core/Classes/templates.php";
-        $this->displayPage(new oPage($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts)));
-    }
-
-    private function displayPage(oPage $page) {
         require "./Core/Classes/files.php";
-        $page->Site = OpenFile("./App/Views/Shared/_layout.dat");
-        $page->Content = OpenFile("./App/Views/Home/$page->Template.dat");
 
-        $page->SiteVars["SiteTitle"] = Constants::GET_SITE_NAME();
-        $page->SiteVars["SiteName"] = Constants::GET_SITE_NAME();
+        $page = new oPage($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
+        if (strpos($master, '/')) {
+            $page->Site = OpenFile("$master");
+        } else {
+            $page->Site = OpenFile("./App/Views/Shared/$master.dat");
+        }
+        $page->HandleSiteIncludes(function ($fileName) {
+            return OpenFile($fileName);
+        });
+        if (strpos($page->Template, '/') === true) {
+            $page->Content = OpenFile($page->Template);
+        } else {
+            $folderName = VIEW_DIRECTORY;
+            $page->Content = OpenFile("./App/Views/$folderName/$page->Template.dat");
+        }
+        $page->HandlePageIncludes(function ($fileName) {
+            return OpenFile($fileName);
+        });
+
+        $page->SiteVars["SiteTitle"] = Constants::SITE_NAME;
+        $page->SiteVars["SiteName"] = Constants::SITE_NAME;
         $page->SiteVars["Scripts"] = "";
-        $page->SiteVars["SiteSubtitle"] = Constants::GET_SITE_SUBTITLE();
-        $page->SiteVars["SiteDescription"] =Constants::GET_SITE_DESCRIPTION();
+        $page->SiteVars["SiteSubtitle"] = Constants::SITE_SUBTITLE;
+        $page->SiteVars["CopyYear"] = date("Y");
+        $page->SiteVars["SiteAddress"] = Constants::SITE_ADDRESS;
+        $page->SiteVars["SiteDescription"] = Constants::SITE_DESCRIPTION;
+        if (isset($page->Title) === true && strlen($page->Title) > 0) {
+            $page->SiteVars["PageTitle"] = $page->Title;
+        } else {
+            $page->SiteVars["PageTitle"] = Constants::SITE_NAME;
+        }
 
         //Setup the optional site variables
         if (VIEW_DATA != null && count(VIEW_DATA) > 0) {

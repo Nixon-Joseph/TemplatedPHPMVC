@@ -9,18 +9,20 @@
 
 	<body>
 		<header>
-				<!-- SiteAddress -->
-				<!-- AccountNav -->
-				<!-- [MainMenu] --><!-- Class --><!-- Link --><!-- Name --><!-- Children --><!-- [/MainMenu] -->
-				<!-- [AdminMenu] --><!-- Class --><!-- Link --><!-- Name --><!-- [/AdminMenu] -->
+            <!-- INCLUDE:Shared/_header.dat -->
+            <!-- SiteAddress -->
+            <!-- AccountNav -->
+            <!-- [MainMenu] --><!-- Class --><!-- Link --><!-- Name --><!-- Children --><!-- [/MainMenu] -->
+            <!-- [AdminMenu] --><!-- Class --><!-- Link --><!-- Name --><!-- [/AdminMenu] -->
 		</header>
 		
 		<main>
-			<!-- PageContent -->
+            <h1><!-- PageTitle --></h1>
+			<div class="container"><!-- PageContent --></div>
 		</main>
 		
 		<footer>
-			<!-- CopyYear -->
+            <!-- INCLUDE:Shared/_footer.dat -->
 		</footer>
 		<!-- Scripts -->
 	</body>

@@ -1,7 +1,8 @@
 <?php
 class Constants {
-    public static function GET_SITE_NAME() { return "SITE_NAME"; }
-    public static function GET_SITE_SUBTITLE() { return "SITE_SUBTITLE"; }
-    public static function GET_SITE_DESCRIPTION() { return "SITE_DESCRIPTION"; }
+    const SITE_NAME = "SITE_NAME";
+    const SITE_SUBTITLE = "SITE_SUBTITLE";
+    const SITE_DESCRIPTION = "SITE_DESCRIPTION";
+    const SITE_ADDRESS = "http://localhost/mvc";
 }
 ?>

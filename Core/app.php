@@ -7,13 +7,14 @@ class App {
     public $db;
     function __construct () {
         $controllerName = "homeController";
+        $viewDirectory = "home";
         if (isset($_GET["Controller"]) && !empty($_GET["Controller"])) {
             $controllerName = $_GET["Controller"];
+            $viewDirectory = $controllerName;
             if ($controllerName === "404") {
                 $controllerName = "fileNotFound";
             }
             $controllerName .= "Controller";
-
         }
         $actionName = "index";
         if (isset($_GET["Action"]) && !empty($_GET["Action"])) {
@@ -26,6 +27,7 @@ class App {
         define("CONTROLLER_NAME", $controllerName);
         define("ACTION_NAME", $actionName);
         define("ROUTE_PARAMS", $routeParams);
+        define('VIEW_DIRECTORY', ucfirst($viewDirectory));
         define("VIEW_DATA", []);
     }
     function config () {
