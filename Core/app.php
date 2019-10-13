@@ -31,7 +31,8 @@ class App {
         define("ACTION_NAME", $actionName);
         define("ROUTE_PARAMS", $routeParams);
         define('VIEW_DIRECTORY', ucfirst($viewDirectory));
-        define("VIEW_DATA", []);
+        define("SITE_DATA", array());
+        define("PAGE_DATA", array());
     }
     private function cleanseParams(array $arr) {
         $params = [];

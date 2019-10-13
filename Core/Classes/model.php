@@ -4,7 +4,6 @@ abstract class Model {
     function __construct () {
         global $app;
         $this->db = $app->db;
-        
     }
 }
 ?>

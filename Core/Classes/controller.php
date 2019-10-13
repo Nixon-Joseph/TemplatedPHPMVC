@@ -3,9 +3,9 @@ abstract class Controller {
     protected $pageTitle;
     protected $pageName;
     protected $folderName;
-    protected $scripts = [];
+    protected $scripts = array();
 
-    private $params = [];
+    private $params = array();
     function __construct () {
         $this->router();
     }
@@ -21,7 +21,7 @@ abstract class Controller {
         }
     }
     public abstract function index();
-    public function view(string $view = ACTION_NAME, string $master = "_layout", mixed $model = null) {
+    public function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout") {
         require "./Core/Classes/templates.php";
         require "./Core/Classes/files.php";
 
@@ -40,6 +40,7 @@ abstract class Controller {
             $folderName = VIEW_DIRECTORY;
             $page->Content = OpenFile("./App/Views/$folderName/$page->Template.dat");
         }
+        $page->HandleModel($model);
         $page->HandlePageIncludes(function ($fileName) {
             return OpenFile($fileName);
         });
@@ -58,8 +59,11 @@ abstract class Controller {
         }
 
         //Setup the optional site variables
-        if (VIEW_DATA != null && count(VIEW_DATA) > 0) {
-            $page->SiteVars = array_merge($page->SiteVars, VIEW_DATA);
+        if (SITE_DATA != null && count(SITE_DATA) > 0) {
+            $page->SiteVars = array_merge($page->SiteVars, SITE_DATA);
+        }
+        if (PAGE_DATA != null && count(PAGE_DATA) > 0) {
+            $page->PageVars = array_merge($page->PageVars, PAGE_DATA);
         }
         //Load page specifics
         //Add in the scripts

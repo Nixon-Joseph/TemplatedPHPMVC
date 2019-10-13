@@ -77,19 +77,6 @@ class oPage
 		$this->ContentSectionReqs = array();
 		$this->SiteVars = array();
 		$this->PageVars = array();
-
-		$this->GetVars = array();
-		$this->PostVars = array();
-	}
-
-	function Get($name, $default = "")
-	{
-		return (isset($this->GetVars[$name]) ? $this->GetVars[$name] : $default);
-	}
-
-	function Post($name, $default = "")
-	{
-		return (isset($this->PostVars[$name]) ? $this->PostVars[$name] : $default);
 	}
 
 	function Show()
@@ -143,7 +130,7 @@ class oPage
 	}
 
 	public function HandleSiteIncludes(callable $getFileContentsFunc) {
-		preg_match_all("/<!-- INCLUDE:(.+) -->/i", $this->Site, $matches);
+		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Site, $matches);
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
@@ -153,7 +140,7 @@ class oPage
 	}
 
 	public function HandlePageIncludes(callable $getFileContentsFunc) {
-		preg_match_all("/<!-- INCLUDE:(.+) -->/i", $this->Site, $matches);
+		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Site, $matches);
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
@@ -162,7 +149,52 @@ class oPage
 		}
 	}
 
-	function GetSection($sectionId)
+    private function object_to_array($obj) {
+        $_arr = is_object($obj) ? get_object_vars($obj) : $obj;
+        foreach ($_arr as $key => $val) {
+            $val = (is_array($val) || is_object($val)) ? $this->object_to_array($val) : $val;
+            $arr[$key] = $val;
+        }
+        return $arr;
+	}
+	
+	public function HandleModel($model, string $section = null) {
+		if (isset($model)) {
+			$modelProps = $this->object_to_array($model);
+            if (count($modelProps) > 0) {
+				if (isset($section) && $section !== null) {
+					foreach ($modelProps as $key => $value) {
+						if ($value != null) {
+							$section = ValueReplace($key, $value, $section);
+						}
+					}
+					return $section;
+				} else {
+					foreach ($modelProps as $key => $value) {
+						$sectionId = "MODEL:$key";
+						if ($value !== null) {
+							if (is_array($value) === true && count($value) > 0) {
+								$section = $this->GetSection($sectionId);
+								$sectionData = "";
+								foreach ($value as $vKey => $vValue) {
+									if (is_object($vValue) === true || is_array($vValue) === true) {
+										$sectionData .= $this->HandleModel($vValue, $section); // only works one layer deep
+									} else {
+										$sectionData .= ArrayReplace(array("Name" => $vValue), $section);
+									}
+								}
+								$this->SetSection($sectionId, $sectionData);
+							} else {
+								$this->Content = ValueReplace($sectionId, $value, $this->Content);
+							}
+						}
+					}
+				}
+            }
+        }
+	}
+
+	function GetSection(string $sectionId)
 	{
 		return GetContentSection($sectionId, $this->Content);
 	}
@@ -203,12 +235,12 @@ class oPage
 	}
 }
 
-function ValueReplace($find, $replace, $template)
+function ValueReplace(string $find, string $replace, string $template)
 {
 	return preg_replace("/<!-- " . $find . " -->/i", $replace, $template);
 }
 
-function ArrayReplace($array, $template)
+function ArrayReplace(array $array, string $template)
 {
 	foreach ($array As $find => $replace) {
 		$template = ValueReplace($find, $replace, $template);
@@ -217,7 +249,7 @@ function ArrayReplace($array, $template)
 	return $template;
 }
 
-function LoadPageTemplateRows($Result, $RowsName, $Template, $DateFormat = "")
+function LoadPageTemplateRows(object $Result, string $RowsName, string $Template, string $DateFormat = "")
 {
 	$Rows = "";
 	$TmpRow = GetContentSection($RowsName, $Template);
@@ -239,7 +271,7 @@ function LoadPageTemplateRows($Result, $RowsName, $Template, $DateFormat = "")
 	return $Template;
 }
 
-function GetContentSection($Name, $Source)
+function GetContentSection(string $Name, string $Source)
 {
 	$FindStart = "<!-- [" . $Name . "] -->";
 	$FindEnd = "<!-- [/" . $Name . "] -->";
@@ -255,7 +287,7 @@ function GetContentSection($Name, $Source)
 	return $Section;
 }
 
-function ReplaceContentSection($Name, $Replace, $Source)
+function ReplaceContentSection(string $Name, string $Replace, string $Source)
 {
 	$FindStart = "<!-- [" . $Name . "] -->";
 	$FindEnd = "<!-- [/" . $Name . "] -->";
