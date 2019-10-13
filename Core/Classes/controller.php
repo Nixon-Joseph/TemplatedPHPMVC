@@ -12,7 +12,7 @@ abstract class Controller {
     private function router () {
         if (empty(ACTION_NAME) === false) {
             if (method_exists($this, ACTION_NAME) === true) {
-                call_user_func_array(array($this, ACTION_NAME), explode('/', !empty(ROUTE_PARAMS) ? ROUTE_PARAMS : ""));
+                call_user_func_array(array($this, ACTION_NAME), !empty(ROUTE_PARAMS) ? explode('/',  ROUTE_PARAMS) : []);
             } else {
                 header('Location: /404/notfound/' . ACTION_NAME);
             }
@@ -21,7 +21,7 @@ abstract class Controller {
         }
     }
     public abstract function index();
-    public function view (string $view = ACTION_NAME, string $master = "_layout", mixed $model = null) {
+    public function view(string $view = ACTION_NAME, string $master = "_layout", mixed $model = null) {
         require "./Core/Classes/templates.php";
         require "./Core/Classes/files.php";
 

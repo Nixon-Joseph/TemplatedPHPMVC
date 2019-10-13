@@ -82,29 +82,6 @@ class oPage
 		$this->PostVars = array();
 	}
 
-	function Prepare($db)
-	{
-		$this->DB = $db;
-
-		//For clean get variables
-		foreach ($_GET as $key => $value) {
-			if (gettype($value) === "string") {
-				$this->GetVars[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
-			} else {
-				$this->GetVars[$key] = $value;
-			}
-		}
-
-		//For clean post variables
-		foreach ($_POST as $key => $value) {
-			if (gettype($value) === "string") {
-				$this->PostVars[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
-			} else {
-				$this->PostVars[$key] = $value;
-			}
-		}
-	}
-
 	function Get($name, $default = "")
 	{
 		return (isset($this->GetVars[$name]) ? $this->GetVars[$name] : $default);

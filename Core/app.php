@@ -6,10 +6,13 @@ class App {
     private $config = [];
     public $db;
     function __construct () {
+        define('REQUEST_GET', $this->cleanseParams($_GET));
+        define('REQUEST_POST', $this->cleanseParams($_POST));
+
         $controllerName = "homeController";
         $viewDirectory = "home";
-        if (isset($_GET["Controller"]) && !empty($_GET["Controller"])) {
-            $controllerName = $_GET["Controller"];
+        if (isset(REQUEST_GET["Controller"]) && !empty(REQUEST_GET["Controller"])) {
+            $controllerName = REQUEST_GET["Controller"];
             $viewDirectory = $controllerName;
             if ($controllerName === "404") {
                 $controllerName = "fileNotFound";
@@ -17,12 +20,12 @@ class App {
             $controllerName .= "Controller";
         }
         $actionName = "index";
-        if (isset($_GET["Action"]) && !empty($_GET["Action"])) {
-            $actionName = $_GET["Action"];
+        if (isset(REQUEST_GET["Action"]) && !empty(REQUEST_GET["Action"])) {
+            $actionName = REQUEST_GET["Action"];
         }
         $routeParams = "";
-        if (isset($_GET["RouteParams"]) && !empty($_GET["RouteParams"])) {
-            $routeParams = $_GET["RouteParams"];
+        if (isset(REQUEST_GET["RouteParams"]) && !empty(REQUEST_GET["RouteParams"])) {
+            $routeParams = REQUEST_GET["RouteParams"];
         }
         define("CONTROLLER_NAME", $controllerName);
         define("ACTION_NAME", $actionName);
@@ -30,7 +33,18 @@ class App {
         define('VIEW_DIRECTORY', ucfirst($viewDirectory));
         define("VIEW_DATA", []);
     }
-    function config () {
+    private function cleanseParams(array $arr) {
+        $params = [];
+        foreach ($arr as $key => $value) {
+            if (gettype($value) === "string") {
+                $params[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
+            } else {
+                $params[$key] = $value;
+            }
+        }
+        return $params;
+    }
+    public function config () {
         $this->require('./Core/Config/session.php');
         $this->require('./Core/Config/database.php');
         $this->require("./Core/Config/constants.php");
@@ -49,7 +63,7 @@ class App {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
-    function autoload () {
+    public function autoload () {
         spl_autoload_register(function ($class) {
             $class = strtolower($class);
             if (file_exists('./Core/Classes/' . $class . '.php')) {
@@ -59,10 +73,10 @@ class App {
             }
         });
     }
-    function require ($path) {
+    private function require ($path) {
         require $path;
     }
-    function start () {
+    public function start () {
         session_name($this->config['sessionName']);
         session_start();
 
