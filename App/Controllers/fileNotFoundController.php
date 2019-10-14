@@ -1,7 +1,9 @@
 <?php
+
 class FileNotFoundController extends Controller {
-    function index() {
+    function Index() {
         $this->view();
     }
 }
+
 ?>

@@ -2,7 +2,7 @@
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
-class App {
+class TemplateMVCApp {
     private $config = [];
     public $db;
     function __construct () {
@@ -45,7 +45,7 @@ class App {
         }
         return $params;
     }
-    public function config () {
+    public function Config () {
         $this->require('./Core/Config/session.php');
         $this->require('./Core/Config/database.php');
         $this->require("./Core/Config/constants.php");
@@ -64,7 +64,7 @@ class App {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
-    public function autoload () {
+    public function Autoload () {
         spl_autoload_register(function ($class) {
             $class = strtolower($class);
             if (file_exists('./Core/Classes/' . $class . '.php')) {
@@ -77,7 +77,7 @@ class App {
     private function require ($path) {
         require $path;
     }
-    public function start () {
+    public function Start () {
         session_name($this->config['sessionName']);
         session_start();
 

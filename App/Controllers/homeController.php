@@ -10,31 +10,8 @@ class HomeController extends Controller {
     /**
      * http://localhost/examplecontroller
      */
-    function index () {
-        $model = new TestModel();
-        $model->id = 123;
-        $model->name = "test";
-        $model->size = 450;
-        $model->arrData = array(new TestModel($model), new TestModel($model, true));
-        $model->arrStr = array("abc", "123");
-        $this->view($model);
+    function Index () {
+        $this->view();
     }
-}
-
-class TestModel extends Model {
-    public function __construct(object $model = null, bool $fudgeData = false) {
-        parent::__construct();
-        if ($model !== null) {
-            $this->id = $fudgeData ? $model->id  * 12 : $model->id;
-            $this->name = $fudgeData ? $model->name  . "fudged" : $model->name;
-            $this->size = $fudgeData ? $model->size  * 4 : $model->size;
-        }
-    }
-
-    public $id;
-    public $name;
-    public $size;
-    public $arrData;
-    public $arrStr;
 }
 ?>

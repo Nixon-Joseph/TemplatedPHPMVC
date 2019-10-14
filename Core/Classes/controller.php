@@ -6,9 +6,11 @@ abstract class Controller {
     protected $scripts = array();
 
     private $params = array();
+
     function __construct () {
         $this->router();
     }
+
     private function router () {
         if (empty(ACTION_NAME) === false) {
             if (method_exists($this, ACTION_NAME) === true) {
@@ -20,29 +22,31 @@ abstract class Controller {
             header('Location: /404');
         }
     }
-    public abstract function index();
-    public function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout") {
-        require "./Core/Classes/templates.php";
-        require "./Core/Classes/files.php";
 
-        $page = new oPage($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
+    public abstract function Index();
+
+    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout") {
+        require "./Core/Classes/Page.php";
+        require "./Core/Classes/Files.php";
+
+        $page = new Page($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
         if (strpos($master, '/')) {
-            $page->Site = OpenFile("$master");
+            $page->Site = Files::OpenFile($master);
         } else {
-            $page->Site = OpenFile("./App/Views/Shared/$master.dat");
+            $page->Site = Files::OpenFile("./App/Views/Shared/$master.dat");
         }
         $page->HandleSiteIncludes(function ($fileName) {
-            return OpenFile($fileName);
+            return Files::OpenFile($fileName);
         });
         if (strpos($page->Template, '/') === true) {
-            $page->Content = OpenFile($page->Template);
+            $page->Content = Files::OpenFile($page->Template);
         } else {
             $folderName = VIEW_DIRECTORY;
-            $page->Content = OpenFile("./App/Views/$folderName/$page->Template.dat");
+            $page->Content = Files::OpenFile("./App/Views/$folderName/$page->Template.dat");
         }
         $page->HandleModel($model);
         $page->HandlePageIncludes(function ($fileName) {
-            return OpenFile($fileName);
+            return Files::OpenFile($fileName);
         });
 
         $page->SiteVars["SiteTitle"] = Constants::SITE_NAME;

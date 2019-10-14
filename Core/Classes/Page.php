@@ -1,41 +1,5 @@
 <?php
-
-//
-
-class oMenu
-{
-	public $ActiveClass;
-	public $DefaultClass;
-	public $MenuItems;
-
-	function __construct($activeClass, $defaultClass)
-	{
-		$this->ActiveClass = $activeClass;
-		$this->DefaultClass = $defaultClass;
-		$this->MenuItems = array();
-	}
-
-	function AddLink($pageId, $altPageIds)
-	{
-		$this->MenuItems[] = new oMenuItem($pageId, $altPageIds);
-	}
-}
-
-class oMenuItem
-{
-	public $PageId;
-	public $AltPageIds;
-
-	//pageId: string for the main page id for the link
-	//altPageId: comma separated string for all alt pages
-	function __construct($pageId, $altPageIds)
-	{
-		$this->PageId = $pageId;
-		$this->AltPageIds = (strlen($altPageIds) > 0) ? explode(",", $altPageIds) : array();
-	}
-}
-
-class oPage
+class Page
 {
 	public $Name;
 	public $Title;
@@ -79,7 +43,7 @@ class oPage
 		$this->PageVars = array();
 	}
 
-	function Show()
+	public function Show()
 	{
 		//Content requests
 		foreach ($this->ContentSectionReqs as $sectionId => $request) {
@@ -194,42 +158,42 @@ class oPage
         }
 	}
 
-	function GetSection(string $sectionId)
+	public function GetSection(string $sectionId)
 	{
 		return GetContentSection($sectionId, $this->Content);
 	}
 
-	function GetSiteSection($sectionId)
+	public function GetSiteSection($sectionId)
 	{
 		return GetContentSection($sectionId, $this->Site);
 	}
 
-	function AddSectionRow($sectionId, $row)
+	public function AddSectionRow($sectionId, $row)
 	{
 		$this->ContentSectionRows[$sectionId][] = $row;
 	}
 
-	function AddSiteSectionRow($sectionId, $row)
+	public function AddSiteSectionRow($sectionId, $row)
 	{
 		$this->SiteSectionRows[$sectionId][] = $row;
 	}
 
-	function SetSectionRequest($sectionId, $request)
+	public function SetSectionRequest($sectionId, $request)
 	{
 		$this->ContentSectionReqs[$sectionId] = $request;
 	}
 
-	function SetSiteSectionRequest($sectionId, $request)
+	public function SetSiteSectionRequest($sectionId, $request)
 	{
 		$this->SiteSectionReqs[$sectionId] = $request;
 	}
 
-	function SetSection($sectionId, $section)
+	public function SetSection($sectionId, $section)
 	{
 		$this->ContentSections[$sectionId] = $section;
 	}
 
-	function SetSiteSection($sectionId, $section)
+	public function SetSiteSection($sectionId, $section)
 	{
 		$this->SiteSections[$sectionId] = $section;
 	}

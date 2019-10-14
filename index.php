@@ -2,9 +2,9 @@
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
-require __DIR__ . '/core/app.php';
-$app = new App();
-$app->autoload();
-$app->config();
-$app->start();
+require __DIR__ . '/Core/TemplateMVCApp.php';
+$app = new TemplateMVCApp();
+$app->Autoload();
+$app->Config();
+$app->Start();
 ?>
