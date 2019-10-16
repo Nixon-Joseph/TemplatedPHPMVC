@@ -4,10 +4,19 @@ abstract class Controller {
     protected $pageName;
     protected $folderName;
     protected $scripts = array();
+    /**
+     * Undocumented variable
+     *
+     * @var Cache
+     */
+    private $cache;
 
     private $params = array();
 
     function __construct () {
+        if (CACHE_LOC != null && strlen(CACHE_LOC) > 0) {
+            $this->cache = new Cache(CACHE_LOC);
+        }
         $this->router();
     }
 
@@ -23,17 +32,33 @@ abstract class Controller {
         }
     }
 
+    protected function outputCache(string $key, int $expiresInSeconds = 120, object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null) {
+        if (isset($this->cache)) {
+            $cachedOutput = $this->cache->GetOutputCache($key);
+            if (isset($cachedOutput) && strlen($cachedOutput) > 0) {
+                echo $cachedOutput;
+            } else {
+                $output = $this->getView($model, $view, $master, $viewData);
+                $this->cache->SetOutputCache($key, $expiresInSeconds, $output);
+                echo $output;
+            }
+        } else {
+            $this->view($model, $view, $master, $viewData);
+        }
+    }
+
     public abstract function Index();
 
-    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout") {
-        require "./Core/Classes/Page.php";
-        require "./Core/Classes/Files.php";
+    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null) {
+        echo $this->getView($model, $view, $master, $viewData);
+    }
 
+    private function getView(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null): string {
         $page = new Page($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
         if (strpos($master, '/')) {
             $page->Site = Files::OpenFile($master);
         } else {
-            $page->Site = Files::OpenFile("./App/Views/Shared/$master.dat");
+            $page->Site = Files::OpenFile(VIEWS_PATH . "/shared/$master.dat");
         }
         $page->HandleSiteIncludes(function ($fileName) {
             return Files::OpenFile($fileName);
@@ -42,20 +67,13 @@ abstract class Controller {
             $page->Content = Files::OpenFile($page->Template);
         } else {
             $folderName = VIEW_DIRECTORY;
-            $page->Content = Files::OpenFile("./App/Views/$folderName/$page->Template.dat");
+            $page->Content = Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template.dat");
         }
         $page->HandleModel($model);
         $page->HandlePageIncludes(function ($fileName) {
             return Files::OpenFile($fileName);
         });
 
-        $page->SiteVars["SiteTitle"] = Constants::SITE_NAME;
-        $page->SiteVars["SiteName"] = Constants::SITE_NAME;
-        $page->SiteVars["Scripts"] = "";
-        $page->SiteVars["SiteSubtitle"] = Constants::SITE_SUBTITLE;
-        $page->SiteVars["CopyYear"] = date("Y");
-        $page->SiteVars["SiteAddress"] = Constants::SITE_ADDRESS;
-        $page->SiteVars["SiteDescription"] = Constants::SITE_DESCRIPTION;
         if (isset($page->Title) === true && strlen($page->Title) > 0) {
             $page->SiteVars["PageTitle"] = $page->Title;
         } else {
@@ -63,11 +81,11 @@ abstract class Controller {
         }
 
         //Setup the optional site variables
-        if (SITE_DATA != null && count(SITE_DATA) > 0) {
+        if (SITE_DATA != null) {
             $page->SiteVars = array_merge($page->SiteVars, SITE_DATA);
         }
-        if (PAGE_DATA != null && count(PAGE_DATA) > 0) {
-            $page->PageVars = array_merge($page->PageVars, PAGE_DATA);
+        if (isset($viewData) && count($viewData) > 0) {
+            $page->ContentVars = array_merge($page->ContentVars, $viewData);
         }
         //Load page specifics
         //Add in the scripts
@@ -104,7 +122,7 @@ abstract class Controller {
                 $page->SetSiteSection($menuId, $menuItems);
             }
         }
-        $page->Show();
+        return $page->Show(false);
     }
 }
 ?>

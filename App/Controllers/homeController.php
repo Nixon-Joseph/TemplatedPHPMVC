@@ -1,4 +1,5 @@
 <?php
+require_once "./core/libraries/php/TemplatedMVC/classes/abstract/controller.php";
 /**
  * Every class deriving from Controller must implement Index() method
  * Index() method is the index page of the controller
@@ -11,7 +12,7 @@ class HomeController extends Controller {
      * http://localhost/examplecontroller
      */
     function Index () {
-        $this->view();
+        $this->outputCache("home_index", 3600);
     }
 }
 ?>

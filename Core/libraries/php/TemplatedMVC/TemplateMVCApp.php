@@ -5,9 +5,11 @@
 class TemplateMVCApp {
     private $config = [];
     public $db;
-    function __construct () {
+    function __construct (?string $cacheLoc = null) {
         define('REQUEST_GET', $this->cleanseParams($_GET));
         define('REQUEST_POST', $this->cleanseParams($_POST));
+
+        define("CACHE_LOC", $cacheLoc);
 
         $controllerName = "homeController";
         $viewDirectory = "home";
@@ -31,8 +33,6 @@ class TemplateMVCApp {
         define("ACTION_NAME", $actionName);
         define("ROUTE_PARAMS", $routeParams);
         define('VIEW_DIRECTORY', ucfirst($viewDirectory));
-        define("SITE_DATA", array());
-        define("PAGE_DATA", array());
     }
     private function cleanseParams(array $arr) {
         $params = [];
@@ -45,16 +45,11 @@ class TemplateMVCApp {
         }
         return $params;
     }
-    public function Config () {
-        $this->require('./Core/Config/session.php');
-        $this->require('./Core/Config/database.php');
-        $this->require("./Core/Config/constants.php");
+    private $sessionName;
+    public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID") {
         try {
-            $this->db = new PDO(
-                'mysql:host=' . $this->config['database']['hostname'] . ';dbname=' . $this->config['database']['dbname'],
-                $this->config['database']['username'], 
-                $this->config['database']['password']
-            );
+            $this->sessionName = $sessionId;
+            $this->db = new PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->db->query('SET NAMES utf8');
             $this->db->query('SET CHARACTER_SET utf8_unicode_ci');
             
@@ -64,30 +59,48 @@ class TemplateMVCApp {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
-    public function Autoload () {
-        spl_autoload_register(function ($class) {
-            $class = strtolower($class);
-            if (file_exists('./Core/Classes/' . $class . '.php')) {
-                require_once './Core/Classes/' . $class . '.php';
-            } else if (file_exists('./Core/Helpers/' . $class . '.php')) {
-                require_once './Core/Helpers/' . $class . '.php';
-            }
-        });
+    /**
+     * Autoload
+     * 
+     * $paths should be at the very least your controller folder path
+     * 
+     * @param array $paths 
+     * @return void
+     */
+    private $paths;
+    private $controllerPath;
+    public function Autoload(string $libPath, string $controllerPath, array $paths = null) {
+        $this->controllerPath = $controllerPath;
+        $_paths = array("$libPath/classes", "$libPath/classes/abstract", "$libPath/includes/jsonmapper", $controllerPath);
+        array_merge($_paths, $paths);
+        if ($_paths !== null && count($_paths) > 0) {
+            $this->paths = $_paths;
+            spl_autoload_register(function ($class) {
+                foreach ($this->paths as $path) {
+                    if (file_exists("$path/$class.php")) {
+                        require_once("$path/$class.php");
+                    }
+                }
+            });
+        }
     }
-    private function require ($path) {
-        require $path;
-    }
-    public function Start () {
-        session_name($this->config['sessionName']);
+    public function Start(string $viewsPath, string $fileNotFoundControllerName, $siteData = null) {
+        define("VIEWS_PATH", $viewsPath);
+
+        if (isset($siteData) && count($siteData) > 0) {
+            define("SITE_DATA", $siteData);
+        }
+
+        session_name($this->sessionName);
         session_start();
 
-        if (file_exists('./App/Controllers/' . CONTROLLER_NAME . '.php')) {
-            $this->require('./App/Controllers/' . CONTROLLER_NAME . '.php');
+        if (file_exists("$this->controllerPath/" . CONTROLLER_NAME . '.php')) {
+            require "$this->controllerPath/" . CONTROLLER_NAME . '.php';
             $controller = CONTROLLER_NAME;
             $c = new $controller();
         } else {
-            $this->require('./App/Controllers/fileNotFoundController.php');
-            $c = new FileNotFoundController();
+            require "$this->controllerPath/$fileNotFoundControllerName.php";
+            $c = new $fileNotFoundControllerName();
         }
     }
 }

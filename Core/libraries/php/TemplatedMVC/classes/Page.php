@@ -14,10 +14,6 @@ class Page
 	public $SiteVars;
 	public $ContentVars;
 
-	public $GetVars;
-	public $PostVars;
-	public $DB;
-
 	//name: the name of the page
 	//title: the title that will be displayed in the browser page title
 	//link: the link to the page
@@ -40,10 +36,10 @@ class Page
 		$this->SiteSectionReqs = array();
 		$this->ContentSectionReqs = array();
 		$this->SiteVars = array();
-		$this->PageVars = array();
+		$this->ContentVars = array();
 	}
 
-	public function Show()
+	public function Show(bool $echoResult = true): ?string
 	{
 		//Content requests
 		foreach ($this->ContentSectionReqs as $sectionId => $request) {
@@ -84,13 +80,17 @@ class Page
 		}
 
 		//Vars
-		$this->Content = ArrayReplace($this->PageVars, $this->Content);
+		$this->Content = ArrayReplace($this->ContentVars, $this->Content);
 		$this->Site = ArrayReplace($this->SiteVars, $this->Site);
 
 		//ContentSection
 		$this->Site = ValueReplace("PageContent", $this->Content, $this->Site);
 
-		echo $this->Site;
+		if ($echoResult === true) {
+			echo $this->Site;
+		} else {
+			return $this->Site;
+		}
 	}
 
 	public function HandleSiteIncludes(callable $getFileContentsFunc) {
@@ -98,7 +98,7 @@ class Page
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
-				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc("./App/Views/$value"), $this->Site);
+				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Site);
 			}
 		}
 	}
@@ -108,7 +108,7 @@ class Page
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
-				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc("./App/Views/$value"), $this->Content);
+				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Content);
 			}
 		}
 	}
@@ -155,7 +155,19 @@ class Page
 					}
 				}
             }
-        }
+        } else {
+			preg_match_all("/<!-- \[?MODEL:([^\]\-]+)\]? -->/", $this->Content, $matches);
+			if (isset($matches) === true && count($matches) > 1) {
+				foreach ($matches[1] as $match => $value) {
+					$key = "MODEL:" . preg_quote($value, '/');
+					if (strpos($matches[0][$match], '[') !== false) {
+						$this->SetSection($key, "");
+					} else {
+						$this->Content = ValueReplace($key, "", $this->Content);
+					}
+				}
+			}
+		}
 	}
 
 	public function GetSection(string $sectionId)
