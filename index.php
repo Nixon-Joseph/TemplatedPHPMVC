@@ -2,7 +2,7 @@
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
-$start = microtime(true);
+//$start = microtime(true);
 $templatedMVCPath = __DIR__ . './core/libraries/php/TemplatedMVC';
 require "$templatedMVCPath/TemplateMVCApp.php";
 $app = new TemplateMVCApp("./app/cache");
@@ -24,5 +24,5 @@ $siteData["SiteDescription"] = Constants::SITE_DESCRIPTION;
 $siteData["PageTitle"] = Constants::SITE_NAME;
 
 $app->Start("./app/views", "FileNotFoundController", $siteData);
-echo 'Render took ' . number_format(microtime(true) - $start, 3) . ' seconds.';
+//echo 'Render took ' . number_format(microtime(true) - $start, 3) . ' seconds.';
 ?>
