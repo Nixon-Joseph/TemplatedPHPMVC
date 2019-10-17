@@ -1,26 +1,23 @@
 <?php
-abstract class Controller {
+abstract class Controller extends ControllerBase {
     protected $pageTitle;
     protected $pageName;
-    protected $folderName;
     protected $scripts = array();
     /**
-     * Undocumented variable
-     *
      * @var Cache
      */
     private $cache;
 
     private $params = array();
 
-    function __construct () {
+    function __construct() {
         if (CACHE_LOC != null && strlen(CACHE_LOC) > 0) {
             $this->cache = new Cache(CACHE_LOC);
         }
         $this->router();
     }
 
-    private function router () {
+    protected function router() {
         if (empty(ACTION_NAME) === false) {
             if (method_exists($this, ACTION_NAME) === true) {
                 call_user_func_array(array($this, ACTION_NAME), !empty(ROUTE_PARAMS) ? explode('/',  ROUTE_PARAMS) : []);
@@ -32,13 +29,14 @@ abstract class Controller {
         }
     }
 
-    protected function outputCache(string $key, int $expiresInSeconds = 120, object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null) {
+    protected function outputCache(string $key, int $expiresInSeconds = 120, callable $viewFunc) {
         if (isset($this->cache)) {
             $cachedOutput = $this->cache->GetOutputCache($key);
             if (isset($cachedOutput) && strlen($cachedOutput) > 0) {
                 echo $cachedOutput;
             } else {
-                $output = $this->getView($model, $view, $master, $viewData);
+                $output = $viewFunc();
+                // $output = $this->getView($model, $view, $master, $viewData);
                 $this->cache->SetOutputCache($key, $expiresInSeconds, $output);
                 echo $output;
             }
@@ -47,13 +45,17 @@ abstract class Controller {
         }
     }
 
-    public abstract function Index();
-
-    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null) {
-        echo $this->getView($model, $view, $master, $viewData);
+    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null, int $responseCode = HttpStatusCode::OK): void {
+        if ($responseCode !== HttpStatusCode::OK) {
+            http_response_code($responseCode);
+        }
+        echo $this->getView($model, $view, $master, $viewData, $responseCode);
     }
 
-    private function getView(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null): string {
+    protected function getView(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null, int $responseCode = HttpStatusCode::OK): string {
+        if ($responseCode !== HttpStatusCode::OK) {
+            http_response_code($responseCode);
+        }
         $page = new Page($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
         if (strpos($master, '/')) {
             $page->Site = Files::OpenFile($master);

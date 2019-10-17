@@ -9,4 +9,9 @@ RewriteEngine on
 RewriteCond %{REQUEST_FILENAME}  !-f
 RewriteCond %{REQUEST_FILENAME}  !-d
 
-RewriteRule ^([a-zA-Z]*)\/?([a-zA-Z0-9]*)?\/?([a-zA-Z0-9\/]*)?\/?$ ./index.php?Page=$1&Action=$2&RouteParams=$3 [NC,L]
+#areas
+RewriteRule ^(api|admin)/([a-zA-Z]*)\/?([a-zA-Z0-9]*)?\/?([a-zA-Z0-9\/]*)?\/?$ ./index.php?Area=$1&Controller=$2&Action=$3&RouteParams=$4 [NC,L]
+#/api/thing/action/params => will look for {controllerDir}/{api}/{thing}{api}controller->{action}
+
+#default
+RewriteRule ^([a-zA-Z]*)\/?([a-zA-Z0-9]*)?\/?([a-zA-Z0-9\/]*)?\/?$ ./index.php?Controller=$1&Action=$2&RouteParams=$3 [NC,L]

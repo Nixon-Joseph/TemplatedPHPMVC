@@ -4,6 +4,9 @@
  */
 class TemplateMVCApp {
     private $config = [];
+    /**
+     * @var PDO
+     */
     public $db;
     function __construct (?string $cacheLoc = null) {
         define('REQUEST_GET', $this->cleanseParams($_GET));
@@ -11,40 +14,37 @@ class TemplateMVCApp {
 
         define("CACHE_LOC", $cacheLoc);
 
-        $controllerName = "homeController";
+        $area = isset(REQUEST_GET["Area"]) && !empty(REQUEST_GET["Area"]) ? REQUEST_GET["Area"] : "";
+        $controllerName = isset(REQUEST_GET["Controller"]) && !empty(REQUEST_GET["Controller"]) ? REQUEST_GET["Controller"] : "home";
         $viewDirectory = "home";
-        if (isset(REQUEST_GET["Controller"]) && !empty(REQUEST_GET["Controller"])) {
-            $controllerName = REQUEST_GET["Controller"];
-            $viewDirectory = $controllerName;
-            if ($controllerName === "404") {
-                $controllerName = "fileNotFound";
-            }
-            $controllerName .= "Controller";
+        $viewDirectory = $controllerName;
+        if ($controllerName === "404") {
+            $controllerName = "fileNotFound";
         }
-        $actionName = "index";
-        if (isset(REQUEST_GET["Action"]) && !empty(REQUEST_GET["Action"])) {
-            $actionName = REQUEST_GET["Action"];
-        }
-        $routeParams = "";
-        if (isset(REQUEST_GET["RouteParams"]) && !empty(REQUEST_GET["RouteParams"])) {
-            $routeParams = REQUEST_GET["RouteParams"];
-        }
+        $controllerName .= ucfirst($area) . "Controller";
+        $actionName = isset(REQUEST_GET["Action"]) && !empty(REQUEST_GET["Action"]) ? REQUEST_GET["Action"] : "index";
+        $routeParams = isset(REQUEST_GET["RouteParams"]) && !empty(REQUEST_GET["RouteParams"]) ? REQUEST_GET["RouteParams"] : "";
         define("CONTROLLER_NAME", $controllerName);
         define("ACTION_NAME", $actionName);
         define("ROUTE_PARAMS", $routeParams);
-        define('VIEW_DIRECTORY', ucfirst($viewDirectory));
+        define('VIEW_DIRECTORY', strlen($area) > 0 ? "$viewDirectory/areas/$area" : $viewDirectory);
+        define('AREA', $area);
     }
+
     private function cleanseParams(array $arr) {
         $params = [];
         foreach ($arr as $key => $value) {
             if (gettype($value) === "string") {
-                $params[$key] = ($db != null) ? $db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
+                // real_escape_string doesn't exist on PDO, and won't require it if using prepared statements like you should
+                //$params[$key] = ($this->db != null) ? $this->db->real_escape_string(htmlspecialchars($value)) : htmlspecialchars($value);
+                $params[$key] = htmlspecialchars($value);
             } else {
                 $params[$key] = $value;
             }
         }
         return $params;
     }
+
     private $sessionName;
     public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID") {
         try {
@@ -59,6 +59,7 @@ class TemplateMVCApp {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
+
     /**
      * Autoload
      * 
@@ -71,8 +72,13 @@ class TemplateMVCApp {
     private $controllerPath;
     public function Autoload(string $libPath, string $controllerPath, array $paths = null) {
         $this->controllerPath = $controllerPath;
-        $_paths = array("$libPath/classes", "$libPath/classes/abstract", "$libPath/includes/jsonmapper", $controllerPath);
-        array_merge($_paths, $paths);
+        $_paths = array(
+            "$libPath/classes",
+            "$libPath/classes/abstract",
+            "$libPath/includes/jsonmapper",
+            AREA !== null && strlen(AREA) > 0 ? "$controllerPath/" . AREA : $controllerPath
+        );
+        array_merge($_paths, isset($paths) ? $paths : array());
         if ($_paths !== null && count($_paths) > 0) {
             $this->paths = $_paths;
             spl_autoload_register(function ($class) {
@@ -84,6 +90,7 @@ class TemplateMVCApp {
             });
         }
     }
+
     public function Start(string $viewsPath, string $fileNotFoundControllerName, $siteData = null) {
         define("VIEWS_PATH", $viewsPath);
 
@@ -94,8 +101,12 @@ class TemplateMVCApp {
         session_name($this->sessionName);
         session_start();
 
-        if (file_exists("$this->controllerPath/" . CONTROLLER_NAME . '.php')) {
-            require "$this->controllerPath/" . CONTROLLER_NAME . '.php';
+        $controllerPath = $this->controllerPath;
+        if (AREA != null && strlen(AREA) > 0) {
+            $controllerPath .= "/" . AREA;
+        }
+        if (file_exists("$controllerPath/" . CONTROLLER_NAME . '.php')) {
+            require "$controllerPath/" . CONTROLLER_NAME . '.php';
             $controller = CONTROLLER_NAME;
             $c = new $controller();
         } else {
