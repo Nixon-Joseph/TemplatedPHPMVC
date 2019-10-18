@@ -7,7 +7,7 @@
                 <!-- MODEL:MainFeaturePostSnippet -->
             </p>
             <p class="lead mb-0">
-                <a href="posts/post/<!-- MODEL:MainFeaturePostUid -->/<!-- MODEL:MainFeaturePostTitle -->" class="text-white font-weight-bold">Continue reading...</a>
+                <a href="/posts/post/<!-- MODEL:MainFeaturePostUid -->/<!-- MODEL:MainFeaturePostTitle -->" class="text-white font-weight-bold">Continue reading...</a>
             </p>
         </div>
     </div>
@@ -19,13 +19,13 @@
                 <div class="card-body d-flex flex-column align-items-start">
                     <strong class="d-inline-block mb-2 text-primary"><!-- Category --></strong>
                     <h3 class="mb-0">
-                        <a class="text-dark" href="posts/post/<!-- Uid -->/<!-- Title -->"><!-- Title --></a>
+                        <a class="text-dark" href="/posts/post/<!-- Uid -->/<!-- Title -->"><!-- Title --></a>
                     </h3>
                     <div class="mb-1 text-muted"><!-- Date --></div>
                     <p class="card-text mb-auto">
                         <!-- Snippet -->
                     </p>
-                    <a href="posts/post/<!-- Uid -->/<!-- Title -->">Continue reading</a>
+                    <a href="/posts/post/<!-- Uid -->/<!-- Title -->">Continue reading</a>
                 </div>
                 <img
                     class="card-img-right flex-auto d-none d-md-block"
@@ -49,7 +49,7 @@
                 <h2 class="blog-post-title"><!-- Title --></h2>
                 <p class="blog-post-meta">
                     <!-- Date -->
-                    by <a href="posts/post/<!-- Uid -->/<!-- Title -->"><!-- Author --></a>
+                    by <a href="/posts/post/<!-- Uid -->/<!-- Title -->"><!-- Author --></a>
                 </p>
                 <!-- Contents -->
             </div>
