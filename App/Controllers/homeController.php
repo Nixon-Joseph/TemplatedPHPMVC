@@ -2,7 +2,13 @@
 class HomeController extends Controller {
     function Index () {
         $this->outputCache("home_index", 3600, function () {
-            return $this->getView();
+            $postHelper = new PostHelper();
+            $posts = $postHelper->GetRecentPosts();
+            $model = null;
+            if (isset($posts) && count($posts) > 0) {
+                $model = new HomeVM($posts);
+            }
+            return $this->getView($model, ACTION_NAME, "_layoutHome", SITE_DATA);
         });
     }
 }

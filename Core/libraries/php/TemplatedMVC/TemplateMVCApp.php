@@ -2,13 +2,15 @@
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
-class TemplateMVCApp {
+class TemplateMVCApp
+{
     private $config = [];
     /**
      * @var PDO
      */
     public $db;
-    function __construct (?string $cacheLoc = null) {
+    public function __construct(?string $cacheLoc = null)
+    {
         define('REQUEST_GET', $this->cleanseParams($_GET));
         define('REQUEST_POST', $this->cleanseParams($_POST));
 
@@ -31,7 +33,8 @@ class TemplateMVCApp {
         define('AREA', $area);
     }
 
-    private function cleanseParams(array $arr) {
+    private function cleanseParams(array $arr)
+    {
         $params = [];
         foreach ($arr as $key => $value) {
             if (gettype($value) === "string") {
@@ -46,13 +49,14 @@ class TemplateMVCApp {
     }
 
     private $sessionName;
-    public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID") {
+    public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID")
+    {
         try {
             $this->sessionName = $sessionId;
             $this->db = new PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->db->query('SET NAMES utf8');
             $this->db->query('SET CHARACTER_SET utf8_unicode_ci');
-            
+
             // TODO: Remove for production
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
@@ -62,36 +66,42 @@ class TemplateMVCApp {
 
     /**
      * Autoload
-     * 
+     *
      * $paths should be at the very least your controller folder path
-     * 
-     * @param array $paths 
+     *
+     * @param array $paths
      * @return void
      */
     private $paths;
     private $controllerPath;
-    public function Autoload(string $libPath, string $controllerPath, array $paths = null) {
+    public function Autoload(string $libPath, string $controllerPath, array $paths = null)
+    {
         $this->controllerPath = $controllerPath;
         $_paths = array(
             "$libPath/classes",
             "$libPath/classes/abstract",
             "$libPath/includes/jsonmapper",
-            AREA !== null && strlen(AREA) > 0 ? "$controllerPath/" . AREA : $controllerPath
+            AREA !== null && strlen(AREA) > 0 ? "$controllerPath/" . AREA : $controllerPath,
         );
-        array_merge($_paths, isset($paths) ? $paths : array());
+        if (isset($paths) && count($paths) > 0) {
+            foreach ($paths as $path) {
+                $_paths[] = $path;
+            }
+        }
         if ($_paths !== null && count($_paths) > 0) {
             $this->paths = $_paths;
             spl_autoload_register(function ($class) {
                 foreach ($this->paths as $path) {
                     if (file_exists("$path/$class.php")) {
-                        require_once("$path/$class.php");
+                        require_once ("$path/$class.php");
                     }
                 }
             });
         }
     }
 
-    public function Start(string $viewsPath, string $fileNotFoundControllerName, $siteData = null) {
+    public function Start(string $viewsPath, string $fileNotFoundControllerName, $siteData = null)
+    {
         define("VIEWS_PATH", $viewsPath);
 
         if (isset($siteData) && count($siteData) > 0) {
@@ -115,4 +125,3 @@ class TemplateMVCApp {
         }
     }
 }
-?>

@@ -7,15 +7,16 @@
 $templatedMVCPath = __DIR__ . './core/libraries/php/TemplatedMVC';
 require "$templatedMVCPath/TemplateMVCApp.php";
 
-$app = new TemplateMVCApp("./app/cache");
+//$app = new TemplateMVCApp("./app/cache");
+$app = new TemplateMVCApp(); // disable caching
 
-$app->Autoload($templatedMVCPath, "./app/controllers", array("./app/models", "./app/helpers"));
+$app->Autoload($templatedMVCPath, "./app/controllers", array("./app/models", "./app/helpers", "./app/repos"));
 
 require "../private/mvc_db_creds.php";
 $app->Config($dbServer, $dbName, $dbUser, $dbPass);
 unset ($dbServer, $dbName, $dbUser, $dbPass);
 
-require_once "./app/classes/Constants.php";
+require "./app/classes/Constants.php";
 
 $siteData = array();
 $siteData["SiteTitle"] = Constants::SITE_NAME;

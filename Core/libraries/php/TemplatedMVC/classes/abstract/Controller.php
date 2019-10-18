@@ -41,7 +41,7 @@ abstract class Controller extends ControllerBase {
                 echo $output;
             }
         } else {
-            $this->view($model, $view, $master, $viewData);
+            echo $viewFunc();
         }
     }
 

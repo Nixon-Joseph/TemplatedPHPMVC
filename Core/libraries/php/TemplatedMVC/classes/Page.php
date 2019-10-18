@@ -104,11 +104,11 @@ class Page
 	}
 
 	public function HandlePageIncludes(callable $getFileContentsFunc) {
-		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Site, $matches);
+		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Content, $matches);
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
-				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Content);
+				$this->Content = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Content);
 			}
 		}
 	}

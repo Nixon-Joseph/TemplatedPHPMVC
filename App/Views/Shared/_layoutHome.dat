@@ -5,13 +5,7 @@
     </head>
 
     <body>
-        <div class="container">
-            <!-- INCLUDE:shared/_header.dat -->
-        </div>
-        <main role="main" class="container">
-            <!-- PageContent -->
-        </main>
-        <!-- /.container -->
+        <!-- PageContent -->
 
         <!-- INCLUDE:shared/_footer.dat -->
 
