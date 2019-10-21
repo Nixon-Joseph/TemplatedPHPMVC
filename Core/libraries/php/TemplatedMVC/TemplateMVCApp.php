@@ -33,6 +33,12 @@ class TemplateMVCApp
         define('AREA', $area);
     }
 
+    /**
+     * This cleans up the get and post parameters to help prevent XSS.
+     *
+     * @param array $arr
+     * @return void
+     */
     private function cleanseParams(array $arr)
     {
         $params = [];
@@ -49,6 +55,16 @@ class TemplateMVCApp
     }
 
     private $sessionName;
+    /**
+     * Set up PDO mysql DB access
+     *
+     * @param string $dbServer
+     * @param string $dbName
+     * @param string $dbUser
+     * @param string $dbPass
+     * @param string $sessionId
+     * @return void
+     */
     public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID")
     {
         try {
@@ -64,16 +80,17 @@ class TemplateMVCApp
         }
     }
 
+    private $paths;
+    private $controllerPath;
     /**
-     * Autoload
-     *
+     * This function sets up the php autoload register for the mvc app.
      * $paths should be at the very least your controller folder path
      *
+     * @param string $libPath
+     * @param string $controllerPath
      * @param array $paths
      * @return void
      */
-    private $paths;
-    private $controllerPath;
     public function Autoload(string $libPath, string $controllerPath, array $paths = null)
     {
         $this->controllerPath = $controllerPath;
@@ -100,7 +117,15 @@ class TemplateMVCApp
         }
     }
 
-    public function Start(string $viewsPath, string $fileNotFoundControllerName, $siteData = null)
+    /**
+     * Start the mvc process
+     *
+     * @param string $viewsPath
+     * @param string $fileNotFoundControllerName
+     * @param array $siteData
+     * @return void
+     */
+    public function Start(string $viewsPath, string $fileNotFoundControllerName, array $siteData = null)
     {
         define("VIEWS_PATH", $viewsPath);
 
