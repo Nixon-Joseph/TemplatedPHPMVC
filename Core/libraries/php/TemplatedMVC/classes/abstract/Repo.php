@@ -137,6 +137,8 @@ abstract class Repo {
      * Returns entire table contents as array of defined class
      *
      * @param integer|null $limit
+     * @param string|null $orderByCol
+     * @param boolean $orderByAscending
      * @return array|null
      */
     protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true) : ?array {
