@@ -115,7 +115,13 @@ abstract class Repo {
         }
     }
 
-    
+    /**
+     * This function takes a sql query and params and returns a list of repo objects found from the query
+     *
+     * @param string $sql
+     * @param array|null $params
+     * @return array|null
+     */
     protected function _query(string $sql, ?array $params = null) : ?array {
         try {
             $statement = $this->db->prepare($sql);
