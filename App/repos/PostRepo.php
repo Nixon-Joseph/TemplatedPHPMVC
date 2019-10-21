@@ -1,27 +1,15 @@
 <?php
-class PostRepo {
-    /**
-     * @var PDO
-     */
-    private $db;
-
+class PostRepo extends Repo {
     public function __construct() {
-        global $app;
-        $this->db = $app->db;
+        parent::__construct("Post");
     }
 
     public function GetRecentPosts(): array {
-        $statement = $this->db->query("SELECT `Uid`, `Name`, `Title`, `Date`, `Author`, `Snippet`, `Contents`, `Category`, `Image`, `Featured` FROM `posts` ORDER BY `Date` DESC LIMIT 6");
-        $posts = $statement->fetchAll(PDO::FETCH_CLASS, 'Post');
-        return $posts;
+        return $this->_query("SELECT $this->columnString FROM $this->table ORDER BY `Date` DESC LIMIT 6");
     }
 
     public function GetPost($postId): Post {
-        $statement = $this->db->prepare("SELECT `Uid`, `Name`, `Title`, `Date`, `Author`, `Snippet`, `Contents`, `Category`, `Image`, `Featured` FROM `posts` WHERE `Uid`=? LIMIT 1");
-        $statement->setFetchMode(PDO::FETCH_CLASS, 'Post');
-        $statement->execute([$postId]);
-        $post = $statement->fetch();
-        return $post;
+        return $this->_getById($postId);
     }
 }
 
