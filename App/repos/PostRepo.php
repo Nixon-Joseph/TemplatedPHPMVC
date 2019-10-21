@@ -5,7 +5,7 @@ class PostRepo extends Repo {
     }
 
     public function GetRecentPosts(): array {
-        return $this->_query("SELECT $this->columnString FROM $this->table ORDER BY `Date` DESC LIMIT 6");
+        return $this->_getAll(6, "Date", false);
     }
 
     public function GetPost($postId): Post {

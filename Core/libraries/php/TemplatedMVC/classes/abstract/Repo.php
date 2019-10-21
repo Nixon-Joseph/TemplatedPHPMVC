@@ -78,14 +78,14 @@ abstract class Repo {
             if (isset($value) && strlen($value) > 0) { // if the value isn't empty
                 if ($isKeyString) { // if the key is a string
                     $this->columnString .= "`$key` as `$value`"; // add `column` as `name` sql
-                    $this->columnArr[strtolower($key)] = '';
+                    $this->columnArr[strtolower($key)] = $key;
                 } else {
                     $this->columnString .= "`$value`"; // otherwise add `column` sql
-                    $this->columnArr[''] = strtolower($value);
+                    $this->columnArr[strtolower($value)] = $value;
                 }
             } else if ($isKeyString) { // if the value isn't set, and the key is a string
                 $this->columnString .= "`$key`"; // add `column` sql
-                $this->columnArr[strtolower($key)] = '';
+                $this->columnArr[strtolower($key)] = $key;
             }
             if ($current < $count - 1) { // add commas except for on last column
                 $this->columnString .= ",";
@@ -139,18 +139,18 @@ abstract class Repo {
      * @param integer|null $limit
      * @return array|null
      */
-    protected function _getAll(?int $limit = 0) : ?array {
-        try {
-            $sql = "SELECT $this->columnString FROM `$this->table`";
-            if (isset($limit) && $limit > 0) {
-                $sql .= " LIMIT $limit";
+    protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true) : ?array {
+        $sql = "SELECT $this->columnString FROM `$this->table`";
+        if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
+            $sql .= " ORDER BY `$orderByCol`";
+            if ($orderByAscending === false) {
+                $sql .= " DESC";
             }
-            $statement = $this->db->query($sql);
-            $posts = $statement->fetchAll(PDO::FETCH_CLASS, $this->className);
-            return $posts;
-        } catch (\Throwable $th) {
-            return null;
         }
+        if (isset($limit) && $limit > 0) {
+            $sql .= " LIMIT $limit";
+        }
+        return $this->_query($sql);;
     }
 
     /**
