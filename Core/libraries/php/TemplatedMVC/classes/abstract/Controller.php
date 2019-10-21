@@ -22,10 +22,10 @@ abstract class Controller extends ControllerBase {
             if (method_exists($this, ACTION_NAME) === true) {
                 call_user_func_array(array($this, ACTION_NAME), !empty(ROUTE_PARAMS) ? explode('/',  ROUTE_PARAMS) : []);
             } else {
-                header('Location: /404/notfound/' . ACTION_NAME);
+                header('Location: /filenotfound/' . ACTION_NAME);
             }
         } else {
-            header('Location: /404');
+            header('Location: /filenotfound');
         }
     }
 

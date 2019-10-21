@@ -9,6 +9,14 @@ class TemplateMVCApp
      * @var PDO
      */
     public $db;
+
+    private $_controllerName;
+    private $_actionName;
+    private $_routeParams;
+    private $_area;
+    private $_viewDirectory;
+
+
     public function __construct(?string $cacheLoc = null)
     {
         define('REQUEST_GET', $this->cleanseParams($_GET));
@@ -26,11 +34,17 @@ class TemplateMVCApp
         $controllerName .= ucfirst($area) . "Controller";
         $actionName = isset(REQUEST_GET["Action"]) && !empty(REQUEST_GET["Action"]) ? REQUEST_GET["Action"] : "index";
         $routeParams = isset(REQUEST_GET["RouteParams"]) && !empty(REQUEST_GET["RouteParams"]) ? REQUEST_GET["RouteParams"] : "";
-        define("CONTROLLER_NAME", $controllerName);
-        define("ACTION_NAME", $actionName);
-        define("ROUTE_PARAMS", $routeParams);
-        define('VIEW_DIRECTORY', strlen($area) > 0 ? "$viewDirectory/areas/$area" : $viewDirectory);
-        define('AREA', $area);
+        
+        $this->_controllerName = $controllerName;
+        $this->_actionName = $actionName;
+        $this->_routeParams = $routeParams;
+        $this->_area = $area;
+        $this->_viewDirectory = (strlen($area) > 0 ? "$viewDirectory/areas/$area" : $viewDirectory);
+        // define("CONTROLLER_NAME", $controllerName);
+        // define("ACTION_NAME", $actionName);
+        // define("ROUTE_PARAMS", $routeParams);
+        // define('VIEW_DIRECTORY', strlen($area) > 0 ? "$viewDirectory/areas/$area" : $viewDirectory);
+        // define('AREA', $area);
     }
 
     /**
@@ -98,7 +112,7 @@ class TemplateMVCApp
             "$libPath/classes",
             "$libPath/classes/abstract",
             "$libPath/includes/jsonmapper",
-            AREA !== null && strlen(AREA) > 0 ? "$controllerPath/" . AREA : $controllerPath,
+            isset($this->this->_area) !== null && strlen($this->_area) > 0 ? "$controllerPath/" . $this->_area : $controllerPath,
         );
         if (isset($paths) && count($paths) > 0) {
             foreach ($paths as $path) {
@@ -135,16 +149,23 @@ class TemplateMVCApp
 
         session_name($this->sessionName);
         session_start();
+        define("ACTION_NAME", $this->_actionName);
+        define("ROUTE_PARAMS", $this->_routeParams);
+        define('AREA', $this->_area);
 
         $controllerPath = $this->controllerPath;
         if (AREA != null && strlen(AREA) > 0) {
             $controllerPath .= "/" . AREA;
         }
-        if (file_exists("$controllerPath/" . CONTROLLER_NAME . '.php')) {
+        if (file_exists("$controllerPath/" . $this->_controllerName . '.php')) {
+            define("CONTROLLER_NAME", $this->_controllerName);
+            define('VIEW_DIRECTORY', $this->_viewDirectory);
             require "$controllerPath/" . CONTROLLER_NAME . '.php';
             $controller = CONTROLLER_NAME;
             $c = new $controller();
         } else {
+            define('VIEW_DIRECTORY', 'filenotfound');
+            define("CONTROLLER_NAME", $fileNotFoundControllerName);
             require "$this->controllerPath/$fileNotFoundControllerName.php";
             $c = new $fileNotFoundControllerName();
         }
