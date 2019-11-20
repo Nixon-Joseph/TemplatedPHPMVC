@@ -2,7 +2,7 @@
 class Files {
 	public static function OpenFile(string $fileName, $BitSize=1000000)
 	{
-		$f = "";
+		$file = "";
 		if(file_exists($fileName)) {
 			$fp = fopen($fileName, 'r');
 			$file = fread($fp,$BitSize);

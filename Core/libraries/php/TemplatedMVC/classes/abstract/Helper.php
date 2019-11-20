@@ -7,7 +7,7 @@ abstract class Helper {
 
     public function __construct() {
         global $app;
-        $this->db = $app->db;
+        $this->db = $app->DB;
     }
 }
 ?>

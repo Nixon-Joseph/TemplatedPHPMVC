@@ -37,7 +37,7 @@ abstract class Repo {
 
     protected function __construct(string $class, string $idCol = "uid", string $table = null, ?array $columnArr = null) {
         global $app;
-        $this->db = $app->db;
+        $this->db = $app->DB;
         $this->className = $class;
         $this->idColumn = strtolower($idCol);
         if (isset($table)) {
@@ -45,6 +45,7 @@ abstract class Repo {
         } else {
             $this->table = $class . 's';
         }
+        $this->table = strtolower($this->table);
         $this->setColumnString($columnArr);
     }
 
@@ -189,7 +190,9 @@ abstract class Repo {
                     if (gettype($key) == 'string') {
                         $loweredKey = strtolower($key);
                         if ($loweredKey !== $this->idColumn && isset($this->columnArr[$loweredKey])) {
-                            $insertCols[$loweredKey] = $value;
+                            if (isset($this->columnArr[$loweredKey])) {
+                                $insertCols[$loweredKey] = gettype($value) === 'boolean' ? ($value ? 1 : 0) : $value;
+                            }
                         }
                     }
                 }
@@ -198,7 +201,7 @@ abstract class Repo {
                 if ($colCount > 0) {
                     $colStr = '';
                     $valStr = '';
-                    $current = 0;
+                    $current = 1;
                     foreach ($insertCols as $key => $value) {
                         $colStr .= "`$key`";
                         $valStr .= ":$key";
@@ -212,7 +215,7 @@ abstract class Repo {
                     if ($statement->rowCount() == 0) {
                         throw new Exception("Failed to insert object into table");
                     } else {
-                        return ResponseInfo::Success($statement->lastInsertId($this->idColumn));
+                        return ResponseInfo::Success($this->db->lastInsertId($this->idColumn));
                     }
                 } else {
                     throw new Exception("Invalid object");
@@ -242,7 +245,7 @@ abstract class Repo {
                         $loweredKey = strtolower($key);
                         if ($loweredKey !== $this->idColumn) {
                             if (isset($this->columnArr[$loweredKey])) {
-                                $updateCols[$loweredKey] = $value;
+                                $updateCols[$loweredKey] = gettype($value) === 'boolean' ? ($value ? 1 : 0) : $value;
                             }
                         } else if (isset($value)) {
                             $idType = getType($value);
@@ -257,15 +260,17 @@ abstract class Repo {
                 
                 $colCount = count($updateCols);
                 if ($colCount > 0) {
-                    $sqtStr = '';
-                    $current = 0;
+                    $setStr = '';
+                    $current = 1;
                     foreach ($updateCols as $key => $value) {
-                        $setStr .= "`$key`=`:$key`";
-                        if ($current++ < $colCount) {
-                            $setStr .= ',';
+                        if ($key !== "_id_") {
+                            $setStr .= "`$key`=:$key";
+                            if ($current < $colCount) {
+                                $setStr .= ',';
+                            }
                         }
+                        $current++;
                     }
-                    $sql .= " WHERE ";
                     $statement = $this->db->prepare("UPDATE `$this->table` SET $setStr WHERE `$this->idColumn`=:_id_");
                     $statement->execute($updateCols);
                     if ($statement->rowCount() == 0) {
@@ -337,7 +342,7 @@ class ResponseInfo {
      * @return ResponseInfo
      */
     public static function Success(?string $id = "", ?string $message = "") : ResponseInfo {
-        return new ReposeInfo(true, $id, $message);
+        return new ResponseInfo(true, $id, $message);
     }
 
     /**
@@ -347,7 +352,7 @@ class ResponseInfo {
      * @return ResponseInfo
      */
     public static function Error(string $message) : ResponseInfo {
-        return new ReposeInfo(false, null, $message);
+        return new ResponseInfo(false, null, $message);
     }
 }
 ?>

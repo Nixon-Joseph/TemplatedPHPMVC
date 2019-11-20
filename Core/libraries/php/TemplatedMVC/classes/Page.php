@@ -79,6 +79,16 @@ class Page
 			$this->Site = ReplaceContentSection($sectionId, $section, $this->Site);
 		}
 
+		//Add in the scripts
+		if (count($this->Scripts) > 0) {
+			foreach ($this->Scripts as $key => $script) {
+				if (strlen($this->SiteVars["Scripts"]) > 0) {
+					$this->SiteVars["Scripts"] .= "\n";
+				}
+				$this->SiteVars["Scripts"] .= "<script src='$script' type='text/javascript'></script>";
+			}
+		}
+
 		//Vars
 		$this->Content = ArrayReplace($this->ContentVars, $this->Content);
 		$this->Site = ArrayReplace($this->SiteVars, $this->Site);
@@ -88,6 +98,7 @@ class Page
 
 		if ($echoResult === true) {
 			echo $this->Site;
+			return null;
 		} else {
 			return $this->Site;
 		}
@@ -111,6 +122,31 @@ class Page
 				$this->Content = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Content);
 			}
 		}
+	}
+
+	public function HandleMenus(array $menus) {
+		if (isset($menus) === true && count($menus) > 0) {
+			preg_match_all("/<!-- \[Menu:(.+[^\]])\] -->/", $this->Site, $matches);
+			if (isset($matches) && count($matches) > 1) {
+				$currentUrl = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+				foreach ($matches[1] as $match => $value) {
+					if (isset($menus[$value]) && count($menus[$value]) > 0) {
+						$menuTemplate = trim($this->GetSiteSection("Menu:$value"));
+						$menuItems = "";
+						foreach ($menus[$value] as $menuObj) {
+							if ($menuObj instanceof MenuItem) {
+								$menuItems .= ArrayReplace([
+									'ActiveClass' => preg_match($menuObj->MatchPattern, $currentUrl) === 1 ? $menuObj->ActiveClass : '',
+									'Link' => $menuObj->Link,
+									'Name' => $menuObj->Name
+								], $menuTemplate);
+							}
+						}
+						$this->Site = ReplaceContentSection("Menu:$value", $menuItems, $this->Site);
+					}
+				}
+			}
+        }
 	}
 
     private function object_to_array($obj) {
@@ -149,6 +185,9 @@ class Page
 								}
 								$this->SetSection($sectionId, $sectionData);
 							} else {
+								if (is_string($value) === false) {
+									$value = var_export($value, true);
+								}
 								$this->Content = ValueReplace($sectionId, $value, $this->Content);
 							}
 						}
@@ -263,7 +302,7 @@ function GetContentSection(string $Name, string $Source)
 	return $Section;
 }
 
-function ReplaceContentSection(string $Name, string $Replace, string $Source)
+function ReplaceContentSection(string $Name, string $Replace, string $Source): string
 {
 	$FindStart = "<!-- [" . $Name . "] -->";
 	$FindEnd = "<!-- [/" . $Name . "] -->";

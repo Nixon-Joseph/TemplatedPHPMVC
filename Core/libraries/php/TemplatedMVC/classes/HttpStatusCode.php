@@ -37,6 +37,7 @@ class HttpStatusCode {
     public const REQUESTED_RANGE_NOT_SATISFIABLE = 416;
     public const EXPECTATION_FAILED = 417;
     public const IM_A_TEAPOT = 418;
+    public const TOO_MANY_REQUESTS = 429;
     public const INTERNAL_SERVER_ERROR = 500;
     public const NOT_IMPLEMENTED = 501;
     public const BAD_GATEWAY = 502;

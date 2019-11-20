@@ -3,32 +3,19 @@ abstract class Controller extends ControllerBase {
     protected $pageTitle;
     protected $pageName;
     protected $scripts = array();
-    /**
-     * @var Cache
-     */
-    private $cache;
 
     private $params = array();
 
-    function __construct() {
-        if (CACHE_LOC != null && strlen(CACHE_LOC) > 0) {
-            $this->cache = new Cache(CACHE_LOC);
-        }
-        $this->router();
-    }
+    public abstract function Index();
 
-    protected function router() {
-        if (empty(ACTION_NAME) === false) {
-            if (method_exists($this, ACTION_NAME) === true) {
-                call_user_func_array(array($this, ACTION_NAME), !empty(ROUTE_PARAMS) ? explode('/',  ROUTE_PARAMS) : []);
-            } else {
-                header('Location: /filenotfound/' . ACTION_NAME);
-            }
-        } else {
-            header('Location: /filenotfound');
-        }
-    }
-
+    /**
+     * Handles output caching controller action
+     *
+     * @param string $key
+     * @param integer $expiresInSeconds
+     * @param callable $viewFunc
+     * @return void
+     */
     protected function outputCache(string $key, int $expiresInSeconds = 120, callable $viewFunc) {
         if (isset($this->cache)) {
             $cachedOutput = $this->cache->GetOutputCache($key);
@@ -36,7 +23,6 @@ abstract class Controller extends ControllerBase {
                 echo $cachedOutput;
             } else {
                 $output = $viewFunc();
-                // $output = $this->getView($model, $view, $master, $viewData);
                 $this->cache->SetOutputCache($key, $expiresInSeconds, $output);
                 echo $output;
             }
@@ -45,18 +31,32 @@ abstract class Controller extends ControllerBase {
         }
     }
 
-    protected function view(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null, int $responseCode = HttpStatusCode::OK): void {
-        if ($responseCode !== HttpStatusCode::OK) {
-            http_response_code($responseCode);
-        }
-        echo $this->getView($model, $view, $master, $viewData, $responseCode);
+    /**
+     * Display view for controller action
+     * If array is passed in as $model, it should be ['key' => 'value'] format
+     *
+     * @param object|array|null $model
+     * @param string $view
+     * @param string $master
+     * @param array|null $viewData
+     * @return void
+     */
+    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): void {
+        echo $this->getView($model, $view, $master, $viewData);
     }
 
-    protected function getView(object $model = null, string $view = ACTION_NAME, string $master = "_layout", $viewData = null, int $responseCode = HttpStatusCode::OK): string {
-        if ($responseCode !== HttpStatusCode::OK) {
-            http_response_code($responseCode);
-        }
-        $page = new Page($this->pageName, $this->pageTitle, "", $view, join(",", $this->scripts));
+    /**
+     * Get view for controller action
+     * If array is passed in as $model, it should be ['key' => 'value'] format
+     *
+     * @param object|array|null $model
+     * @param string $view
+     * @param string $master
+     * @param array|null $viewData
+     * @return string
+     */
+    protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): string {
+        $page = new Page($this->pageName, $this->pageTitle, "", $view, implode(",", $this->scripts));
         if (strpos($master, '/')) {
             $page->Site = Files::OpenFile($master);
         } else {
@@ -89,41 +89,12 @@ abstract class Controller extends ControllerBase {
         if (isset($viewData) && count($viewData) > 0) {
             $page->ContentVars = array_merge($page->ContentVars, $viewData);
         }
-        //Load page specifics
-        //Add in the scripts
-        if (isset($page->Scripts) === true && count($page->Scripts) > 0) {
-            foreach ($page->Scripts as $key => $script) {
-                if (strlen($page->SiteVars["Scripts"]) > 0) {
-                    $page->SiteVars["Scripts"] .= "\n";
-                }
-                $page->SiteVars["Scripts"] .= "<script src=\"".$ScriptDir.$script."\" type=\"text/javascript\"></script>";
-            }
-        }
         //Set the site title
         if (isset($page->Title) === true && strlen($page->Title) > 0) {
             $page->SiteVars["SiteTitle"] = $page->Title;
         }
-        //Load the menus
-        if (isset($Menus) === true && count($Menus) > 0) {
-            foreach ($Menus as $menuId => $menu) {
-                $menuTemplate = $page->GetSiteSection($menuId);
-                $menuItems = "";
-                foreach ($menu->MenuItems as $key => $menuItem) {
-                    if (isset($pages[$menuItem->PageId])) {
-                        $pageInfo = $pages[$menuItem->PageId];
-                        $itemAr = array("Link" => $pageInfo->Link, "Name" => $pageInfo->Name, "Class" => $menu->DefaultClass);
-                        if ($menuItem->PageId == $pageId) {
-                            $itemAr["Class"] = $menu->ActiveClass;
-                        }
-                        if ((count($menuItem->AltPageIds) > 0) && in_array($pageId, $menuItem->AltPageIds)) {
-                            $itemAr["Class"] = $menu->ActiveClass;
-                        }
-                        $menuItems .= ArrayReplace($itemAr, $menuTemplate);
-                    }
-                }
-                $page->SetSiteSection($menuId, $menuItems);
-            }
-        }
+        global $app;
+        $page->HandleMenus($app->Menus);
         return $page->Show(false);
     }
 }
