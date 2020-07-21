@@ -104,27 +104,33 @@ class Page
 		}
 	}
 
-	public function HandleSiteIncludes(callable $getFileContentsFunc) {
+	public function HandleSiteIncludes(callable $getFileContentsFunc, int $recursiveLevel = 0, int $maxDepth = 5) {
 		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Site, $matches);
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
 				$this->Site = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Site);
+				if ($recursiveLevel < $maxDepth) {
+					$this->HandleSiteIncludes($getFileContentsFunc, $recursiveLevel + 1, $maxDepth);
+				}
 			}
 		}
 	}
 
-	public function HandlePageIncludes(callable $getFileContentsFunc) {
+	public function HandlePageIncludes(callable $getFileContentsFunc, int $recursiveLevel = 0, int $maxDepth = 5) {
 		preg_match_all("/<!-- INCLUDE:(.+) -->/", $this->Content, $matches);
 		if (isset($matches) === true && count($matches) > 1) {
 			foreach ($matches[1] as $match => $value) {
 				$escapedVal = preg_quote($value, '/');
 				$this->Content = ValueReplace("INCLUDE:$escapedVal", $getFileContentsFunc(VIEWS_PATH . "/$value"), $this->Content);
+				if ($recursiveLevel < $maxDepth) {
+					$this->HandlePageIncludes($getFileContentsFunc, $recursiveLevel + 1, $maxDepth);
+				}
 			}
 		}
 	}
 
-	public function HandleMenus(array $menus) {
+	public function HandleMenus(?array $menus) {
 		if (isset($menus) === true && count($menus) > 0) {
 			preg_match_all("/<!-- \[Menu:(.+[^\]])\] -->/", $this->Site, $matches);
 			if (isset($matches) && count($matches) > 1) {
