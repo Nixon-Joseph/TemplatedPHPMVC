@@ -57,7 +57,7 @@ abstract class Controller extends ControllerBase {
      */
     protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): string {
         $page = new Page($this->pageName, $this->pageTitle, "", $view, implode(",", $this->scripts));
-        if (strpos($master, '/')) {
+        if (strpos($master, '/') !== false) {
             $page->Site = Files::OpenFile($master);
         } else {
             $page->Site = Files::OpenFile(VIEWS_PATH . "/shared/$master.dat");
@@ -65,7 +65,7 @@ abstract class Controller extends ControllerBase {
         $page->HandleSiteIncludes(function ($fileName) {
             return Files::OpenFile($fileName);
         });
-        if (strpos($page->Template, '/') === true) {
+        if (strpos($page->Template, '/') !== false) {
             $page->Content = Files::OpenFile($page->Template);
         } else {
             $folderName = VIEW_DIRECTORY;

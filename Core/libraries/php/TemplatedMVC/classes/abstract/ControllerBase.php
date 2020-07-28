@@ -22,5 +22,10 @@ abstract class ControllerBase {
             http_response_code($responseCode);
         }
     }
+
+    public function redirect(string $path): void {
+        header("Location: $path");
+        exit;
+    }
 }
 ?>

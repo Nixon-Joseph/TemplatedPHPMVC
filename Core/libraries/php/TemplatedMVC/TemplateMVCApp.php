@@ -148,13 +148,33 @@ class TemplateMVCApp
     public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID")
     {
         try {
+            $this->ConfigSession($sessionId);
             $this->sessionName = $sessionId;
             $this->DB = new PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->DB->query('SET NAMES utf8');
             $this->DB->query('SET CHARACTER_SET utf8_unicode_ci');
 
             // TODO: Remove for production
-            $this->DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // $this->DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo 'Connection error: ' . $e->getMessage();
+        }
+    }
+    
+    /**
+     * Set up PDO mysql DB access
+     *
+     * @param string $dbServer
+     * @param string $dbName
+     * @param string $dbUser
+     * @param string $dbPass
+     * @param string $sessionId
+     * @return void
+     */
+    public function ConfigSession(string $sessionId = "SID")
+    {
+        try {
+            $this->sessionName = $sessionId;
         } catch (PDOException $e) {
             echo 'Connection error: ' . $e->getMessage();
         }

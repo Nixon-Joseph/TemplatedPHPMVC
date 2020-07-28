@@ -196,6 +196,8 @@ class Page
 								}
 								$this->Content = ValueReplace($sectionId, $value, $this->Content);
 							}
+						} else {
+							$this->Content = ValueReplace($sectionId, '', $this->Content);
 						}
 					}
 				}
