@@ -31,7 +31,13 @@ class TemplateMVCApp
     public function __construct(?string $cacheLoc = null)
     {
         define('REQUEST_GET', $this->cleanseParams($_GET));
-        define('REQUEST_POST', $this->cleanseParams($_POST));
+        $postObjJson = file_get_contents("php://input");
+        $postArr = [];
+        if (empty($postObjJson) === false) {
+            $decoded = json_decode($postObjJson, true);
+            $postArr = $decoded ? $decoded : [];
+        }
+        define('REQUEST_POST', $this->cleanseParams(array_merge($_POST, $postArr)));
 
         define("CACHE_LOC", $cacheLoc);
 
