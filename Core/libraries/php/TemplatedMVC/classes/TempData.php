@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 //https://stackoverflow.com/a/7514523/4765038
 /**
  * This class uses session to allow you to quickly/easily save/retreive values accross requests

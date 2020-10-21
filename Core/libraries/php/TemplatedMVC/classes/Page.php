@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 class Page
 {
 	public $Name;

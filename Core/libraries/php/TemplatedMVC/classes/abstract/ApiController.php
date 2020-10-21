@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC\Base;
 abstract class ApiController extends ControllerBase {
     /**
      * Print jsonified output of any object passed in.

@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 use Pelago\Emogrifier\CssInliner;
 
 class EmailHelper {

@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 class ExceptionHelper {
     /**
      * provide a Java style exception trace

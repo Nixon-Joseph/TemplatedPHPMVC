@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 /**
  * https://www.php.net/manual/en/function.http-response-code.php
  * "Enum" of HttpStatusCodes

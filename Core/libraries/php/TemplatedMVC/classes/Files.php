@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 class Files {
 	public static function OpenFile(string $fileName, $BitSize=1000000)
 	{

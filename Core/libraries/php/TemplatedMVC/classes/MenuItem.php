@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 class MenuItem {
     /**
      * class used for current nav item

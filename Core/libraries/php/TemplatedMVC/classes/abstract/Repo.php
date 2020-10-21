@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC\Base;
 abstract class Repo {
     /**
      * Class name for PDO to map to

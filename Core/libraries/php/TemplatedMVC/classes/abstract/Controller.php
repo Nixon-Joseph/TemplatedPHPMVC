@@ -1,4 +1,4 @@
-<?php
+<?php  namespace devpirates\MVC\Base;
 abstract class Controller extends ControllerBase {
     protected $pageTitle;
     protected $pageName;

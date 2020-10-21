@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 class Authentication {
     public static function GenerateHashAndSalt(string $password): array {
         $intermediateSalt = md5(uniqid(rand(), true));
