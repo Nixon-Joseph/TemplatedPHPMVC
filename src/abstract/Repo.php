@@ -59,7 +59,7 @@ abstract class Repo {
             } catch (\Throwable $th) { }
             if (isset($obj) && is_object($obj)) { // if the object exists
                 $reflect = new \ReflectionClass($obj); // build reflection object
-                $props   = $reflect->getProperties(ReflectionProperty::IS_PUBLIC); // get public properties
+                $props   = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC); // get public properties
                 $columnArr = array(); // set property names to $columnsArr
                 foreach ($props as $value) {
                     $columnArr[] = $value->getName();
@@ -166,7 +166,7 @@ abstract class Repo {
     protected function _getById($id) : ?object {
         try {
             $statement = $this->db->prepare("SELECT $this->columnString FROM `$this->table` WHERE `$this->idColumn`=? LIMIT 1");
-            $statement->setFetchMode(PDO::FETCH_CLASS, $this->className);
+            $statement->setFetchMode(\PDO::FETCH_CLASS, $this->className);
             $statement->execute([$id]);
             $object = $statement->fetch();
             return $object;
@@ -213,12 +213,12 @@ abstract class Repo {
                     $statement = $this->db->prepare("INSERT INTO `$this->table` ($colStr) VALUES ($valStr)");
                     $statement->execute($insertCols);
                     if ($statement->rowCount() == 0) {
-                        throw new Exception("Failed to insert object into table");
+                        throw new \Exception("Failed to insert object into table");
                     } else {
                         return ResponseInfo::Success($this->db->lastInsertId($this->idColumn));
                     }
                 } else {
-                    throw new Exception("Invalid object");
+                    throw new \Exception("Invalid object");
                 }
             } catch (\Throwable $th) {
                 return ResponseInfo::Error($th->getMessage());
@@ -255,7 +255,7 @@ abstract class Repo {
                     }
                 }
                 if ($hasId === false) {
-                    throw new Exception("Object has no id value");
+                    throw new \Exception("Object has no id value");
                 }
                 
                 $colCount = count($updateCols);
@@ -274,12 +274,12 @@ abstract class Repo {
                     $statement = $this->db->prepare("UPDATE `$this->table` SET $setStr WHERE `$this->idColumn`=:_id_");
                     $statement->execute($updateCols);
                     if ($statement->rowCount() == 0) {
-                        throw new Exception("Failed to insert object into table");
+                        throw new \Exception("Failed to insert object into table");
                     } else {
                         return ResponseInfo::Success();
                     }
                 } else {
-                    throw new Exception("Invalid object");
+                    throw new \Exception("Invalid object");
                 }
             } catch (\Throwable $th) {
                 return ResponseInfo::Error($th->getMessage());
