@@ -15,8 +15,8 @@
     ],
     "autoload": {
         "psr-0": { 
-            "devpirates\\MVC": "src/",
-            "devpirates\\MVC\\Base": "src/abstract/"
+            "devpirates\\MVC\\": "src/",
+            "devpirates\\MVC\\Base\\": "src/abstract/"
         }
     },
     "require": {
