@@ -90,7 +90,7 @@ class TemplateMVCApp
      * @param array $paths
      * @return void
      */
-    public function Autoload(string $libPath, string $controllerPath, array $paths = null)
+    public function Autoload(string $controllerPath, array $paths = null)
     {
         $this->controllerPath = $controllerPath;
         $_paths = array(
