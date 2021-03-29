@@ -13,6 +13,12 @@
             "email": "matt@devpirates.com"
         }
     ],
+    "autoload": {
+        "psr-0": { 
+            "devpirates\\MVC": "src/",
+            "devpirates\\MVC\\Base": "src/classes/abstract/"
+        }
+    },
     "require": {
         "liquid/liquid": "^1.4",
         "pelago/emogrifier": "^5.0",
