@@ -127,7 +127,7 @@ abstract class Repo {
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute($params);
-            $objs = $statement->fetchAll(PDO::FETCH_CLASS, $this->className);
+            $objs = $statement->fetchAll(\PDO::FETCH_CLASS, $this->className);
             return $objs;
         } catch (\Throwable $th) {
             return null;
