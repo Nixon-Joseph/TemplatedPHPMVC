@@ -1,7 +1,23 @@
 {
-    "name": "devpirates/mvc",
-    "version": "0.1.0",
+    "name": "devpirates/templated-php-mvc",
+    "description": "Library to help people quickly build and maintain an mvc project in php with lots of helpful built in tools and utilities",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Joseph Nixon",
+            "email": "joseph@jnrdevelopment.com"
+        },
+        {
+            "name": "Matt Nixon",
+            "email": "davincreed@gmail.com"
+        }
+    ],
     "require": {
-        "liquid/liquid": "^1.4"
+        "liquid/liquid": "^1.4",
+        "pelago/emogrifier": "^5.0",
+        "sonata-project/google-authenticator": "^2.3",
+        "netresearch/jsonmapper": "^4.0",
+        "bshaffer/oauth2-server-php": "^1.11"
     }
 }

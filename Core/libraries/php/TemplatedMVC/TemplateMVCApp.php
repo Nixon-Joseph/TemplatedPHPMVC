@@ -97,21 +97,7 @@ class TemplateMVCApp
         $_paths = array(
             $controllerPath,
             "$libPath/classes",
-            "$libPath/classes/abstract",
-            "$libPath/includes/JsonMapper",
-            "$libPath/includes/GoogleAuthenticator",
-            "$libPath/includes/Emogrifier",
-            "$libPath/includes/Emogrifier/HtmlProcessor",
-            "$libPath/includes/Emogrifier/Utilities",
-            "$libPath/includes/Emogrifier/CssSelector",
-            "$libPath/includes/Emogrifier/CssSelector/Exception",
-            "$libPath/includes/Emogrifier/CssSelector/Node",
-            "$libPath/includes/Emogrifier/CssSelector/Parser",
-            "$libPath/includes/Emogrifier/CssSelector/Parser/Handler",
-            "$libPath/includes/Emogrifier/CssSelector/Parser/Shortcut",
-            "$libPath/includes/Emogrifier/CssSelector/Parser/Tokenizer",
-            "$libPath/includes/Emogrifier/CssSelector/XPath",
-            "$libPath/includes/Emogrifier/CssSelector/XPath/Extension"
+            "$libPath/classes/abstract"
         );
         if (isset($this->this->_area) !== null && strlen($this->_area) > 0) {
             $_paths[] = "$controllerPath/" . $this->_area;
