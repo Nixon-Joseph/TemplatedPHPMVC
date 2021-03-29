@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="en-us">
     <head>
-        <!-- INCLUDE:shared/_headerLinksAndScripts.dat -->
+        {% include 'shared/_headerLinksAndScripts.dat' %}
     </head>
 
     <body>
         <div class="container">
-            <!-- INCLUDE:shared/_header.dat -->
+            {% include 'shared/_header.dat' %}
         </div>
         <main role="main" class="container">
-            <!-- PageContent -->
+            {{ content }}
         </main>
-        <!-- /.container -->
+        
+        {% include 'shared/_footer.dat' %}
 
-        <!-- INCLUDE:shared/_footer.dat -->
-
-        <!-- INCLUDE:shared/_footerLinksAndScripts.dat -->
+        {% include 'shared/_footerLinksAndScripts.dat' %}
     </body>
 </html>

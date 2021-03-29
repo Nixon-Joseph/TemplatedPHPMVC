@@ -1,7 +1,7 @@
 <?php namespace devpirates\MVC\Base;
 abstract class ControllerBase {
     /**
-     * @var Cache
+     * @var \devpirates\MVC\Cache
      */
     protected $cache;
 
@@ -18,7 +18,7 @@ abstract class ControllerBase {
      * @return void
      */
     protected function setResponseStatus(int $responseCode): void {
-        if ($responseCode !== HttpStatusCode::OK) {
+        if ($responseCode !== \devpirates\MVC\HttpStatusCode::OK) {
             http_response_code($responseCode);
         }
     }

@@ -1,5 +1,5 @@
 <?php namespace devpirates\MVC\Base;
-abstract class ApiController extends ControllerBase {
+abstract class ApiController extends \devpirates\MVC\Base\ControllerBase {
     /**
      * Print jsonified output of any object passed in.
      * Prints 'null' if $data param is null

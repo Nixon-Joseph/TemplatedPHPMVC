@@ -1,4 +1,4 @@
-<?php
+<?php namespace devpirates\MVC;
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
@@ -6,13 +6,13 @@ class TemplateMVCApp
 {
     private $config = [];
     /**
-     * @var PDO
+     * @var \PDO
      */
     public $DB;
     /**
      * OAuth2 server
      *
-     * @var Server
+     * @var OAUTH2\Server
      */
     public $OAuthServer;
     /**
@@ -156,24 +156,20 @@ class TemplateMVCApp
         try {
             $this->ConfigSession($sessionId);
             $this->sessionName = $sessionId;
-            $this->DB = new PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
+            $this->DB = new \PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->DB->query('SET NAMES utf8');
             $this->DB->query('SET CHARACTER_SET utf8_unicode_ci');
 
             // TODO: Remove for production
             // $this->DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
     
     /**
-     * Set up PDO mysql DB access
+     * Set up session
      *
-     * @param string $dbServer
-     * @param string $dbName
-     * @param string $dbUser
-     * @param string $dbPass
      * @param string $sessionId
      * @return void
      */
@@ -181,7 +177,7 @@ class TemplateMVCApp
     {
         try {
             $this->sessionName = $sessionId;
-        } catch (PDOException $e) {
+        } catch (\Exception $e) {
             echo 'Connection error: ' . $e->getMessage();
         }
     }
@@ -236,6 +232,10 @@ class TemplateMVCApp
             define('VIEW_DIRECTORY', $this->_viewDirectory);
             call_user_func_array(array($controller, $this->_actionName), !empty($this->_routeParams) ? explode('/', $this->_routeParams) : []);
         } catch (\Throwable $th) {
+            echo "<pre>";
+            var_dump($th);
+            echo "</pre>";
+            die();
             http_response_code(HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }

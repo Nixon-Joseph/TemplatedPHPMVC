@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en-us">
     <head>
-        <!-- INCLUDE:shared/_headerLinksAndScripts.dat -->
+        {% include 'shared/_headerLinksAndScripts.dat' %}
     </head>
 
     <body>
-        <!-- PageContent -->
+        {{ content }}
+        
+        {% include 'shared/_footer.dat' %}
 
-        <!-- INCLUDE:shared/_footer.dat -->
-
-        <!-- INCLUDE:shared/_footerLinksAndScripts.dat -->
+        {% include 'shared/_footerLinksAndScripts.dat' %}
     </body>
 </html>

@@ -1,5 +1,5 @@
 <?php  namespace devpirates\MVC\Base;
-abstract class Controller extends ControllerBase {
+abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
     protected $pageTitle;
     protected $pageName;
     protected $scripts = array();
@@ -56,46 +56,34 @@ abstract class Controller extends ControllerBase {
      * @return string
      */
     protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): string {
-        $page = new Page($this->pageName, $this->pageTitle, "", $view, implode(",", $this->scripts));
-        if (strpos($master, '/') !== false) {
-            $page->Site = Files::OpenFile($master);
-        } else {
-            $page->Site = Files::OpenFile(VIEWS_PATH . "/shared/$master.dat");
-        }
-        $page->HandleSiteIncludes(function ($fileName) {
-            return Files::OpenFile($fileName);
-        });
-        if (strpos($page->Template, '/') !== false) {
-            $page->Content = Files::OpenFile($page->Template);
+        
+        \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
+
+        $template = new \Liquid\Template(VIEWS_PATH);
+        
+        $page = new \devpirates\MVC\Page($this->pageName, $this->pageTitle, "", $view, implode(",", $this->scripts));
+
+        if (strpos($view, '/') !== false) {
+            $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
             $folderName = VIEW_DIRECTORY;
-            $page->Content = Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template.dat");
+            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template.dat"));
         }
-        $page->HandleModel($model);
-        $page->HandlePageIncludes(function ($fileName) {
-            return Files::OpenFile($fileName);
-        });
+        $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
-        if (isset($page->Title) === true && strlen($page->Title) > 0) {
-            $page->SiteVars["PageTitle"] = $page->Title;
+        if (strpos($master, '/') !== false) {
+            $template->parse(\devpirates\MVC\Files::OpenFile($master));
         } else {
-            $page->SiteVars["PageTitle"] = Constants::SITE_NAME;
+            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/shared/$master.dat"));
         }
 
-        //Setup the optional site variables
-        if (SITE_DATA != null) {
-            $page->SiteVars = array_merge($page->SiteVars, SITE_DATA);
-        }
-        if (isset($viewData) && count($viewData) > 0) {
-            $page->ContentVars = array_merge($page->ContentVars, $viewData);
-        }
-        //Set the site title
-        if (isset($page->Title) === true && strlen($page->Title) > 0) {
-            $page->SiteVars["SiteTitle"] = $page->Title;
-        }
         global $app;
-        $page->HandleMenus($app->Menus);
-        return $page->Show(false);
+        return $template->render(array(
+            'content' => $pageContent,
+            'siteData' => SITE_DATA,
+            'viewData' => $viewData,
+            'menus' => $app->Menus
+        ));
     }
 }
 ?>
