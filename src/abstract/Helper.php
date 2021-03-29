@@ -1,7 +1,7 @@
 <?php namespace devpirates\MVC\Base;
 abstract class Helper {
     /**
-     * @var PDO
+     * @var \PDO
      */
     protected $db;
 

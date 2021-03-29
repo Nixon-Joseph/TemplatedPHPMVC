@@ -67,14 +67,14 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
             $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
             $folderName = VIEW_DIRECTORY;
-            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template.dat"));
+            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template." . TEMPLATE_EXTENSION));
         }
         $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
         if (strpos($master, '/') !== false) {
             $template->parse(\devpirates\MVC\Files::OpenFile($master));
         } else {
-            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/shared/$master.dat"));
+            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/shared/$master." . TEMPLATE_EXTENSION));
         }
 
         global $app;

@@ -7,7 +7,7 @@ abstract class ControllerBase {
 
     public function __construct() {
         if (CACHE_LOC != null && strlen(CACHE_LOC) > 0) {
-            $this->cache = new Cache(CACHE_LOC);
+            $this->cache = new \devpirates\MVC\Cache(CACHE_LOC);
         }
     }
 

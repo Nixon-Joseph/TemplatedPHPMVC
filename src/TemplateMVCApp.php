@@ -28,8 +28,9 @@ class TemplateMVCApp
     private $_area;
     private $_viewDirectory;
 
-    public function __construct(?string $cacheLoc = null)
+    public function __construct(?string $templateExtension = "haml", ?string $cacheLoc = null)
     {
+        define(TEMPLATE_EXTENSION, $templateExtension);
         define('REQUEST_GET', $this->cleanseParams($_GET));
         $postObjJson = file_get_contents("php://input");
         $postArr = [];
