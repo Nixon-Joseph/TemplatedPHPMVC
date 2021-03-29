@@ -60,14 +60,12 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
         $template = new \Liquid\Template(VIEWS_PATH);
-        
-        $page = new \devpirates\MVC\Page($this->pageName, $this->pageTitle, "", $view, implode(",", $this->scripts));
 
         if (strpos($view, '/') !== false) {
             $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
             $folderName = VIEW_DIRECTORY;
-            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$page->Template." . TEMPLATE_EXTENSION));
+            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$view." . TEMPLATE_EXTENSION));
         }
         $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
