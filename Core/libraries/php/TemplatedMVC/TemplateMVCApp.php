@@ -86,7 +86,6 @@ class TemplateMVCApp
      * This function sets up the php autoload register for the mvc app.
      * $paths should be at the very least your controller folder path
      *
-     * @param string $libPath
      * @param string $controllerPath
      * @param array $paths
      * @return void
@@ -95,9 +94,7 @@ class TemplateMVCApp
     {
         $this->controllerPath = $controllerPath;
         $_paths = array(
-            $controllerPath,
-            "$libPath/classes",
-            "$libPath/classes/abstract"
+            $controllerPath
         );
         if (isset($this->this->_area) !== null && strlen($this->_area) > 0) {
             $_paths[] = "$controllerPath/" . $this->_area;
