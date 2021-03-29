@@ -31,7 +31,7 @@ abstract class Repo {
      */
     protected $idColumn;
     /**
-     * @var PDO
+     * @var \PDO
      */
     protected $db;
 
@@ -58,7 +58,7 @@ abstract class Repo {
                 $obj = new $className();
             } catch (\Throwable $th) { }
             if (isset($obj) && is_object($obj)) { // if the object exists
-                $reflect = new ReflectionClass($obj); // build reflection object
+                $reflect = new \ReflectionClass($obj); // build reflection object
                 $props   = $reflect->getProperties(ReflectionProperty::IS_PUBLIC); // get public properties
                 $columnArr = array(); // set property names to $columnsArr
                 foreach ($props as $value) {
