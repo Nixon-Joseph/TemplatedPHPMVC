@@ -3,6 +3,7 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
     protected $pageTitle;
     protected $pageName;
     protected $scripts = array();
+    protected $styles = array();
 
     private $params = array();
 
@@ -80,7 +81,9 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
             'content' => $pageContent,
             'siteData' => SITE_DATA,
             'viewData' => $viewData,
-            'menus' => $app->Menus
+            'menus' => $app->Menus,
+            'scripts' => $this->scripts,
+            'styles' => $this->styles
         ));
     }
 }
