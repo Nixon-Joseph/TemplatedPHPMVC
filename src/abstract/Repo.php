@@ -42,15 +42,16 @@ abstract class Repo {
         $this->db = $app->DB;
         $this->className = $class;
         $this->idColumn = strtolower($idCol);
-        if (isset($table)) {
-            $this->table = $table;
-        } else {
-            $this->table = $class . 's';
-        }
+        $this->table = isset($table) ? $table : $class . 's';
         $this->table = strtolower($this->table);
         $this->setColumnString($columnArr);
     }
 
+    /**
+     * This function sets up the column string and array for the requested object
+     *
+     * @param array|null $columnArr
+     */
     private function setColumnString(?array $columnArr) {
         // If defined columns have not been passed in, reflect them
         if (isset($columnArr) == false || count($columnArr) <= 0) {
@@ -291,8 +292,13 @@ abstract class Repo {
         }
     }
 
-    
-    protected function _delete($id) : ResponseInfo {
+    /**
+     * Deletes a row by id for configured table
+     * 
+     * @param any $id
+     * @return ResponseInfo
+     */
+    protected function _delete(any $id) : ResponseInfo {
         try {
             $statement = $this->db->prepare("DELETE FROM `$this->table` WHERE `$this->idColumn`=?");
             $statement->execute([$id]);

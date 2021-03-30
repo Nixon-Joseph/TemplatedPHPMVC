@@ -10,12 +10,6 @@ class TemplateMVCApp
      */
     public $DB;
     /**
-     * OAuth2 server
-     *
-     * @var OAUTH2\Server
-     */
-    public $OAuthServer;
-    /**
      * Menus array, takes array of array of MenuItem ['menuName' => [MenuItem, MenuItem]]
      *
      * @var array
