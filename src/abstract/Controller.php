@@ -1,4 +1,7 @@
 <?php  namespace devpirates\MVC\Base;
+
+use zz\Html\HTMLMinify;
+
 abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
     protected $pageTitle;
     protected $pageName;
@@ -40,10 +43,11 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param string $view
      * @param string $master
      * @param array|null $viewData
+     * @param boolean $minify
      * @return void
      */
-    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): void {
-        echo $this->getView($model, $view, $master, $viewData);
+    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): void {
+        echo $this->getView($model, $view, $master, $viewData, $minify);
     }
 
     /**
@@ -54,9 +58,10 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param string $view
      * @param string $master
      * @param array|null $viewData
+     * @param boolean $minify
      * @return string
      */
-    protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null): string {
+    protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): string {
         
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
@@ -77,7 +82,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         }
 
         global $app;
-        return $template->render(array(
+        
+        $output = $template->render(array(
             'content' => $pageContent,
             'siteData' => SITE_DATA,
             'viewData' => $viewData,
@@ -85,6 +91,10 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
             'scripts' => $this->scripts,
             'styles' => $this->styles
         ));
+        if ($minify) {
+            $output = HTMLMinify::minify($output);
+        }
+        return $output;
     }
 }
 ?>
