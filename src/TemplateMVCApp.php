@@ -43,7 +43,7 @@ class TemplateMVCApp
         if ($controllerName === "404") {
             $controllerName = "fileNotFound";
         }
-        $controllerName .= "Controller";
+        $controllerName .= ucfirst($area) . "Controller";
         $actionName = isset(REQUEST_GET["Action"]) && !empty(REQUEST_GET["Action"]) ? REQUEST_GET["Action"] : "index";
         $routeParams = isset(REQUEST_GET["RouteParams"]) && !empty(REQUEST_GET["RouteParams"]) ? REQUEST_GET["RouteParams"] : "";
 
