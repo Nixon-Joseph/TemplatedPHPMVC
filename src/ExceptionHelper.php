@@ -8,7 +8,7 @@ class ExceptionHelper {
      *                   leave as NULL when calling this function
      * @return array
      */
-    public static function JTraceEx(\Throwable $e, $seen=null): array {
+    public static function JTraceEx(\Throwable $e, $seen=null): string {
         $starter = $seen ? 'Caused by: ' : '';
         $result = array();
         if (!$seen) $seen = array();
@@ -40,7 +40,7 @@ class ExceptionHelper {
         }
         $result = join("\n", $result);
         if ($prev)
-            $result  .= "\n" . jTraceEx($prev, $seen);
+            $result .= "\n" . self::JTraceEx($prev, $seen);
 
         return $result;
     }

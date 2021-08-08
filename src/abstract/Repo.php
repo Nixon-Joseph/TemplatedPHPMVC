@@ -298,7 +298,7 @@ abstract class Repo {
      * @param any $id
      * @return ResponseInfo
      */
-    protected function _delete(any $id) : ResponseInfo {
+    protected function _delete(mixed $id) : ResponseInfo {
         try {
             $statement = $this->db->prepare("DELETE FROM `$this->table` WHERE `$this->idColumn`=?");
             $statement->execute([$id]);

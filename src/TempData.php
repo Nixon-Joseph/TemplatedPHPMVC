@@ -16,15 +16,15 @@ class TempData {
 
     public static function json_get(string $offset): ?object {
         try {
-            return json_decode(get($offset));
+            return json_decode(self::get($offset));
         } catch (\Throwable $th) {
             return null;
         }
     }
 
-    public static function json_set(string $offset, any $value): void {
+    public static function json_set(string $offset, mixed $value): void {
         try {
-            set($offset, json_encode($value));
+            self::set($offset, json_encode($value));
         } catch (\Throwable $th) { }
     }
 }

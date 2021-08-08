@@ -27,8 +27,7 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase {
      * @param any|null $callableParams
      * @return void
      */
-    protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, ?any $callableParams = null): void {
-        $throttle;
+    protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, ?mixed $callableParams = null): void {
         if (isset($_SESSION["Throttle-$throttleName"])) {
             $throttle = json_decode($_SESSION["Throttle-$throttleName"]);
         } else {
@@ -56,7 +55,7 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase {
                 $method();
             }
         } else {
-            $this->setResponseStatus(HttpStatusCode::TOO_MANY_REQUESTS);
+            $this->setResponseStatus(\devpirates\MVC\HttpStatusCode::TOO_MANY_REQUESTS);
             echo "Too many requests, please wait a bit and try again.";
         }
     }

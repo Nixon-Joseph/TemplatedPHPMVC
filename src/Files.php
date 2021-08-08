@@ -30,7 +30,7 @@ class Files {
 	{
 		echo $uri."<br>\n";
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_URL, $uri);
 		curl_setopt($ch, CURLOPT_REFERER, $referer);
 		//curl_setopt($ch, CURLOPT_REFERER, "http://www.serebii.net/pokedex-dp/icon/001.gif");
 		// cos they do browser detection! :O
@@ -44,7 +44,7 @@ class Files {
 		if (strlen($data) < 100) { // rly basic atm
 			return 1;
 		}
-		WriteFile($data, $dest);
+		self::WriteFile($data, $dest);
 		return 0;
 	}
 	
@@ -58,7 +58,7 @@ class Files {
 		return true;
 	}
 	
-	public static function Spaces(number $num, string $str = '')
+	public static function Spaces(int $num, string $str = '')
 	{
 		$nbsp = "&nbsp;";
 		if ('' != $str) {

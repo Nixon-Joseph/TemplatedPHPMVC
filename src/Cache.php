@@ -108,7 +108,7 @@ class CacheObject extends CacheObjectBase {
     public static function FromString(string $json, object $mapToObj): ?CacheObject {
         try {
             $data = json_decode($json, true);
-            $jm = new JsonMapper();
+            $jm = new \JsonMapper();
             return $jm->map($data, $mapToObj);
         } catch (\Throwable $th) {
             return null;

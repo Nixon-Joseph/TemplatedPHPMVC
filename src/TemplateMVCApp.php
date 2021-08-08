@@ -195,7 +195,6 @@ class TemplateMVCApp
                 return new $fnfControllerName();
             };
     
-            $controller;
             if (file_exists("$controllerPath/" . $this->_controllerName . '.php') === true) {
                 $controller = new $this->_controllerName();
                 if (method_exists($controller, $this->_actionName) === false) {
