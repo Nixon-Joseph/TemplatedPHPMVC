@@ -38,7 +38,6 @@ class TemplateMVCApp
 
         $area = isset(REQUEST_GET["Area"]) && !empty(REQUEST_GET["Area"]) ? REQUEST_GET["Area"] : "";
         $controllerName = isset(REQUEST_GET["Controller"]) && !empty(REQUEST_GET["Controller"]) ? REQUEST_GET["Controller"] : "home";
-        $viewDirectory = "home";
         $viewDirectory = $controllerName;
         if ($controllerName === "404") {
             $controllerName = "fileNotFound";
@@ -51,7 +50,7 @@ class TemplateMVCApp
         $this->_actionName = $actionName;
         $this->_routeParams = $routeParams;
         $this->_area = $area;
-        $this->_viewDirectory = (strlen($area) > 0 ? "$viewDirectory/areas/$area" : $viewDirectory);
+        $this->_viewDirectory = (strlen($area) > 0 ? "areas/$area/$viewDirectory" : $viewDirectory);
     }
 
     /**
