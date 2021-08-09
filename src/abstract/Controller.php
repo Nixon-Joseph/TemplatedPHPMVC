@@ -62,23 +62,23 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @return string
      */
     protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): string {
-        
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
-        $template = new \Liquid\Template(VIEWS_PATH);
+        $viewPath = strlen(AREA) ? (VIEWS_PATH . "/areas/" . AREA) : VIEWS_PATH;
+        $template = new \Liquid\Template($viewPath);
 
         if (strpos($view, '/') !== false) {
             $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
             $folderName = VIEW_DIRECTORY;
-            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/$folderName/$view." . TEMPLATE_EXTENSION));
+            $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/$folderName/$view." . TEMPLATE_EXTENSION)); 
         }
         $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
         if (strpos($master, '/') !== false) {
             $template->parse(\devpirates\MVC\Files::OpenFile($master));
         } else {
-            $template->parse(\devpirates\MVC\Files::OpenFile(VIEWS_PATH . "/shared/$master." . TEMPLATE_EXTENSION));
+            $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/shared/$master." . TEMPLATE_EXTENSION));
         }
 
         global $app;

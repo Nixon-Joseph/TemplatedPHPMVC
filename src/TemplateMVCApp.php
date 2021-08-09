@@ -50,7 +50,7 @@ class TemplateMVCApp
         $this->_actionName = $actionName;
         $this->_routeParams = $routeParams;
         $this->_area = $area;
-        $this->_viewDirectory = (strlen($area) > 0 ? "areas/$area/$viewDirectory" : $viewDirectory);
+        $this->_viewDirectory = $viewDirectory;
     }
 
     /**
