@@ -24,11 +24,19 @@ class MenuItem {
      * @var string
      */
     public $MatchPattern;
+    /**
+     * String representation of icon
+     * Could be class string, or attribute value - whatever you need.
+     *
+     * @var string
+     */
+    public $Icon;
 
-    public function __construct(string $name, string $link, ?string $activeClass = null, string $matchPattern = null) {
+    public function __construct(string $name, string $link, ?string $activeClass = null, ?string $icon = null, string $matchPattern = null) {
         $this->Name = $name;
         $this->Link = $link;
         $this->ActiveClass = isset($activeClass) && strlen($activeClass) ? $activeClass : '';
+        $this->Icon = isset($icon) && strlen($icon) ? $icon : '';
         $this->MatchPattern = "/^" . (isset($matchPattern) && strlen($matchPattern) ? $matchPattern : preg_replace('/\//', '\/', $link)) . "$/i";
     }
 }
