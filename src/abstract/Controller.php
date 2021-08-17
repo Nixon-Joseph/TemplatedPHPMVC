@@ -67,6 +67,14 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         $viewPath = strlen(AREA) ? (VIEWS_PATH . "/areas/" . AREA) : VIEWS_PATH;
         $template = new \Liquid\Template($viewPath);
 
+        global $app;
+
+        if (isset($app->LiquidFilters) && count($app->LiquidFilters)) {
+            foreach ($app->LiquidFilters as $key => $value) {
+                $template->registerFilter($key, $value);
+            }
+        }
+
         if (strpos($view, '/') !== false) {
             $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
@@ -80,8 +88,6 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         } else {
             $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/shared/$master." . TEMPLATE_EXTENSION));
         }
-
-        global $app;
         
         $output = $template->render(array(
             'content' => $pageContent,

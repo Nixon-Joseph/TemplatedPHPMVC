@@ -15,6 +15,12 @@ class TemplateMVCApp
      * @var array
      */
     public $Menus;
+    /**
+     * Menus array, takes array of array of functions to be used as liquid filters ['menuName' => function]
+     *
+     * @var array
+     */
+    public $LiquidFilters;
 
     private $_controllerName;
     private $_actionName;
