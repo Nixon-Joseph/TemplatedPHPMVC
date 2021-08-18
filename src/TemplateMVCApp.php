@@ -16,7 +16,7 @@ class TemplateMVCApp
      */
     public $Menus;
     /**
-     * Menus array, takes array of array of functions to be used as liquid filters ['menuName' => function]
+     * Menus array, takes array of functions to be used as liquid filters ['filterName' => function, 'filterName2' => function]
      *
      * @var array
      */
@@ -57,6 +57,7 @@ class TemplateMVCApp
         $this->_routeParams = $routeParams;
         $this->_area = $area;
         $this->_viewDirectory = $viewDirectory;
+        $this->LiquidFilters = array();
     }
 
     /**
@@ -220,5 +221,13 @@ class TemplateMVCApp
             die();
             http_response_code(HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public function GetBaseLiquidFilters(): array {
+        return array(
+            "get_menu_item_class" => function ( $menuItem ) {
+                return preg_match($menuItem->MatchPattern, $_SERVER['REQUEST_URI']) ? $menuItem->ActiveClass : "";
+            }
+        );
     }
 }
