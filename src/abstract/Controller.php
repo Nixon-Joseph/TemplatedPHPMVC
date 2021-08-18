@@ -72,7 +72,7 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
          */
         global $app;
 
-        $allFilters = array_merge($app->GetBaseLiquidFilters, isset($app->LiquidFilters) ? $app->LiquidFilters : []);
+        $allFilters = array_merge($app->GetBaseLiquidFilters(), isset($app->LiquidFilters) ? $app->LiquidFilters : []);
         if (isset($app->LiquidFilters) && count($app->LiquidFilters)) {
             foreach ($allFilters as $key => $value) {
                 $template->registerFilter($key, $value);
