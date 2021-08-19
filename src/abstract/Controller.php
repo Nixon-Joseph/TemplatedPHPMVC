@@ -68,12 +68,12 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         $template = new \Liquid\Template($viewPath);
 
         /**
-         * @var \devpirates\MVC\TemplateMVCApp
+         * @global \devpirates\MVC\TemplateMVCApp
          */
         global $app;
 
-        $allFilters = array_merge($app->GetBaseLiquidFilters(), isset($app->LiquidFilters) ? $app->LiquidFilters : []);
-        if (isset($app->LiquidFilters) && count($app->LiquidFilters)) {
+        $allFilters = array_merge($app->GetBaseLiquidFilters(), isset($app->LiquidFilters) ? $app->LiquidFilters : array());
+        if (isset($allFilters) && count($allFilters)) {
             foreach ($allFilters as $key => $value) {
                 $template->registerFilter($key, $value);
             }
