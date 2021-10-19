@@ -156,11 +156,11 @@ abstract class Repo {
         if (isset($limit) && $limit > 0) {
             $sql .= " LIMIT $limit";
         }
-        return $this->_query($sql);;
+        return $this->_query($sql);
     }
 
     /**
-     * Returns entire table contents as array of defined class
+     * Returns entire table paged contents as array of defined class
      *
      * @param integer $page
      * @param integer $pageSize
@@ -168,17 +168,38 @@ abstract class Repo {
      * @param boolean $orderByAscending
      * @return array|null
      */
-    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol = null, bool $orderByAscending = true) : ?array {
-        $sql = "SELECT $this->columnString FROM `$this->table`";
-        if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
-            $sql .= " ORDER BY `$orderByCol`";
-            if ($orderByAscending === false) {
-                $sql .= " DESC";
+    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol, bool $orderByAscending = true) : ?array {
+        try {
+            $sql = "SELECT $this->columnString FROM `$this->table`";
+            if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
+                $sql .= " ORDER BY `$orderByCol`";
+                if ($orderByAscending === false) {
+                    $sql .= " DESC";
+                }
             }
+            $offset = ($page - 1) * $pageSize;
+            $sql .= " LIMIT $offset, $pageSize";
+            $results = $this->_query($sql);
+            $totalRecords = $this->_getCount();
+            return array("results" => $results, "totalRecords" => $totalRecords);
+        } catch (\Throwable $th) {
+            return null;
         }
-        $offset = ($page - 1) * $pageSize;
-        $sql .= " LIMIT $offset, $pageSize";
-        return $this->_query($sql);;
+    }
+
+    /**
+     * Returns count of table
+     *
+     * @return integer
+     */
+    protected function _getCount() : int {
+        try {
+            $statement = $this->db->prepare("SELECT COUNT($this->idColumn) FROM `$this->table`");
+            $statement->execute();
+            return $statement->fetchColumn();
+        } catch (\Throwable $th) {
+            return -1;
+        }
     }
 
     /**
