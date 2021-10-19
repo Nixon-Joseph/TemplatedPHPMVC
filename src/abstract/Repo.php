@@ -181,6 +181,7 @@ abstract class Repo {
             $sql .= " LIMIT $offset, $pageSize";
             $results = $this->_query($sql);
             $totalRecords = $this->_getCount();
+            
             return array("results" => $results, "totalRecords" => $totalRecords, "pages" => $totalRecords / $pageSize);
         } catch (\Throwable $th) {
             return null;
