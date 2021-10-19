@@ -160,6 +160,28 @@ abstract class Repo {
     }
 
     /**
+     * Returns entire table contents as array of defined class
+     *
+     * @param integer $page
+     * @param integer $pageSize
+     * @param string $orderByCol
+     * @param boolean $orderByAscending
+     * @return array|null
+     */
+    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol = null, bool $orderByAscending = true) : ?array {
+        $sql = "SELECT $this->columnString FROM `$this->table`";
+        if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
+            $sql .= " ORDER BY `$orderByCol`";
+            if ($orderByAscending === false) {
+                $sql .= " DESC";
+            }
+        }
+        $offset = ($page - 1) * $pageSize;
+        $sql .= " LIMIT $offset, $pageSize";
+        return $this->_query($sql);;
+    }
+
+    /**
      * Queries the table for a particular row by Id
      * Returns an instance of the defined class for the repo filled with the row data
      *
