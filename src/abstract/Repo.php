@@ -321,7 +321,7 @@ abstract class Repo {
                     $statement = $this->db->prepare("UPDATE `$this->table` SET $setStr WHERE `$this->idColumn`=:_id_");
                     $statement->execute($updateCols);
                     if ($statement->rowCount() == 0) {
-                        throw new \Exception("Failed to insert object into table");
+                        throw new \Exception("Failed to update object on table");
                     } else {
                         return ResponseInfo::Success();
                     }
