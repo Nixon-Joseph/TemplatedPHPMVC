@@ -24,10 +24,10 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase {
      * @param integer $timesPer
      * @param integer $minutes
      * @param callable $method
-     * @param any|null $callableParams
+     * @param mixed|null $callableParams
      * @return void
      */
-    protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, ?mixed $callableParams = null): void {
+    protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, $callableParams = null): void {
         if (isset($_SESSION["Throttle-$throttleName"])) {
             $throttle = json_decode($_SESSION["Throttle-$throttleName"]);
         } else {

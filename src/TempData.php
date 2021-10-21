@@ -22,7 +22,7 @@ class TempData {
         }
     }
 
-    public static function json_set(string $offset, mixed $value): void {
+    public static function json_set(string $offset, $value): void {
         try {
             self::set($offset, json_encode($value));
         } catch (\Throwable $th) { }
