@@ -143,10 +143,19 @@ abstract class Repo {
      * @param integer|null $limit
      * @param string|null $orderByCol
      * @param boolean $orderByAscending
+     * @param array $filters - array of QueryFilter
      * @return array|null
      */
-    protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true) : ?array {
+    protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true, ?array $filters = null) : ?array {
         $sql = "SELECT $this->columnString FROM `$this->table`";
+        $params = null;
+        if (isset($filters) && count($filters) > 0) {
+            $filterResult = $this->_buildSqlFromQueryFilters($filters);
+            if (isset($filterResult) && count($filterResult)) {
+                $sql .= $filterResult['sql'];
+                $params = $filterResult['params'];
+            }
+        }
         if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
             $sql .= " ORDER BY `$orderByCol`";
             if ($orderByAscending === false) {
@@ -156,7 +165,7 @@ abstract class Repo {
         if (isset($limit) && $limit > 0) {
             $sql .= " LIMIT $limit";
         }
-        return $this->_query($sql);
+        return $this->_query($sql, $params);
     }
 
     /**
@@ -166,11 +175,20 @@ abstract class Repo {
      * @param integer $pageSize
      * @param string $orderByCol
      * @param boolean $orderByAscending
+     * @param array $filters - array of QueryFilter
      * @return array|null
      */
-    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol, bool $orderByAscending = true) : ?array {
+    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol, bool $orderByAscending = true, ?array $filters = null) : ?array {
         try {
             $sql = "SELECT $this->columnString FROM `$this->table`";
+            $params = null;
+            if (isset($filters) && count($filters) > 0) {
+                $filterResult = $this->_buildSqlFromQueryFilters($filters);
+                if (isset($filterResult) && count($filterResult)) {
+                    $sql .= $filterResult['sql'];
+                    $params = $filterResult['params'];
+                }
+            }
             if (isset($orderByCol) && isset($this->columnArr[strtolower($orderByCol)])) {
                 $sql .= " ORDER BY `$orderByCol`";
                 if ($orderByAscending === false) {
@@ -179,13 +197,62 @@ abstract class Repo {
             }
             $offset = ($page - 1) * $pageSize;
             $sql .= " LIMIT $offset, $pageSize";
-            $results = $this->_query($sql);
+            $results = $this->_query($sql, $params);
             $totalRecords = $this->_getCount();
 
             return array("results" => $results, "totalRecords" => $totalRecords, "pages" => ceil($totalRecords / $pageSize));
         } catch (\Throwable $th) {
             return null;
         }
+    }
+
+    /**
+     * Builds a where clause for query - returns sql and params to match
+     * 
+     * @param array $filters
+     * @param bool $hasWhere
+     * @param int $depth
+     * @param array $params
+     * @param string $groupOperator
+     * @return array|null
+     */
+    protected function _buildSqlFromQueryFilters(array $filters, bool $hasWhere = false, int $depth = 0, array $params = null, string $groupOperator = null) : ?array {
+        if (isset($filters) && count($filters) > 0) {
+            $sql = "";
+            $addedFilters = false;
+            foreach ($filters as $index => $filter) {
+                if (gettype($filter) == 'object' && get_class($filter) == 'devpirates\MVC\Base\QueryFilter') {
+                    if ($index === 0 && !$hasWhere) {
+                        $sql .= ' WHERE ';
+                        $params = array();
+                        $hasWhere = true;
+                    }
+                    if ($index > 0 && isset($groupOperator) && strlen($groupOperator)) {
+                        $sql .= " $groupOperator ";
+                    }
+                    if (isset($filter->filters) && count($filter->filters)) {
+                        $filterBuild = $this->_buildSqlFromQueryFilters($filter->filters, $hasWhere, $depth + $index, $params, $filter->groupOperator);
+                        if (isset($filterBuild) && count($filterBuild)) {
+                            $sql .= '(';
+                            $sql .= $filterBuild['sql'];
+                            $sql .= ')';
+                            $params = array_merge($params, $filterBuild['params']);
+                            $addedFilters = true;
+                        }
+                    } else if (isset($this->columnArr[strtolower($filter->column)])) {
+                        $loweredKey = strtolower($filter->column);
+                        $paramKey = $loweredKey . $depth . $index;
+                        $sql .= $loweredKey . $filter->operator . ":$paramKey";
+                        $params[$paramKey] = gettype($filter->value) === 'boolean' ? ($filter->value ? 1 : 0) : $filter->value;
+                        $addedFilters = true;
+                    }
+                }
+            }
+            if ($addedFilters) {
+                return array('sql' => $sql, 'params' => $params);
+            } 
+        }
+        return null;
     }
 
     /**
@@ -356,4 +423,53 @@ abstract class Repo {
         }
     }
 }
+
+class QueryFilter {
+    /**
+     * Column name for comparison
+     * 
+     * @var string
+     */
+    public $column;
+    /**
+     * operator (=, !=, >, <, LIKE)
+     *
+     * @var string
+     */
+    public $operator;
+    /**
+     * string value for comparison
+     *
+     * @var mixed
+     */
+    public $value;
+    /**
+     * Array of QueryFilters
+     *
+     * @var array
+     */
+    public $filters;
+    /**
+     * operator for all filters in $filters (AND, OR)
+     *
+     * @var array
+     */
+    public $groupOperator;
+
+    public static function Filter(string $column, string $value, string $operator = '=') : QueryFilter {
+        $filter = new QueryFilter();
+        $filter->column = $column;
+        $filter->value = $value;
+        $filter->operator = $operator;
+        return $filter;
+    }
+
+    public static function FilterGroup(array $filters, string $groupOperator = 'AND') : QueryFilter {
+        $filter = new QueryFilter();
+        $filter->filters = $filters;
+        $filter->groupOperator = $groupOperator;
+        return $filter;
+    }
+}
+
 ?>
