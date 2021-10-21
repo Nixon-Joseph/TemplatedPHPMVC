@@ -1,4 +1,6 @@
 <?php namespace devpirates\MVC\Base;
+
+use devpirates\MVC\GUIDHelper;
 use \devpirates\MVC\ResponseInfo;
 
 abstract class Repo {
@@ -33,15 +35,22 @@ abstract class Repo {
      */
     protected $idColumn;
     /**
+     * If true, will generate GUID for entity ids if not present in insert
+     *
+     * @var bool
+     */
+    protected $generateGuidsForIds;
+    /**
      * @var \PDO
      */
     protected $db;
 
-    protected function __construct(string $class, string $idCol = "uid", string $table = null, ?array $columnArr = null) {
+    protected function __construct(string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null) {
         global $app;
         $this->db = $app->DB;
         $this->className = $class;
         $this->idColumn = strtolower($idCol);
+        $this->generateGuidsForIds = $generateGuidsForIds;
         $this->table = isset($table) ? $table : $class . 's';
         $this->table = strtolower($this->table);
         $this->setColumnString($columnArr);
@@ -198,7 +207,7 @@ abstract class Repo {
             $offset = ($page - 1) * $pageSize;
             $sql .= " LIMIT $offset, $pageSize";
             $results = $this->_query($sql, $params);
-            $totalRecords = $this->_getCount();
+            $totalRecords = $this->_getCount($filters);
 
             return array("results" => $results, "totalRecords" => $totalRecords, "pages" => ceil($totalRecords / $pageSize));
         } catch (\Throwable $th) {
@@ -241,7 +250,7 @@ abstract class Repo {
                         }
                     } else if (isset($this->columnArr[strtolower($filter->column)])) {
                         $loweredKey = strtolower($filter->column);
-                        $paramKey = $loweredKey . $depth . $index;
+                        $paramKey = isset($filter->placeholderOverride) && strlen($filter->placeholderOverride) ? $filter->placeholderOverride : $loweredKey . $depth . $index;
                         $sql .= $loweredKey . $filter->operator . ":$paramKey";
                         $params[$paramKey] = gettype($filter->value) === 'boolean' ? ($filter->value ? 1 : 0) : $filter->value;
                         $addedFilters = true;
@@ -258,12 +267,22 @@ abstract class Repo {
     /**
      * Returns count of table
      *
+     * @param array $filters
      * @return integer
      */
-    protected function _getCount() : int {
+    protected function _getCount(?array $filters = null) : int {
         try {
-            $statement = $this->db->prepare("SELECT COUNT($this->idColumn) FROM `$this->table`");
-            $statement->execute();
+            $sql = "SELECT COUNT($this->idColumn) FROM `$this->table`";
+            $params = null;
+            if (isset($filters) && count($filters) > 0) {
+                $filterResult = $this->_buildSqlFromQueryFilters($filters);
+                if (isset($filterResult) && count($filterResult)) {
+                    $sql .= $filterResult['sql'];
+                    $params = $filterResult['params'];
+                }
+            }
+            $statement = $this->db->prepare($sql);
+            $statement->execute($params);
             return $statement->fetchColumn();
         } catch (\Throwable $th) {
             return -1;
@@ -300,15 +319,18 @@ abstract class Repo {
             try {
                 $insertCols = array();
                 $objectArr = get_object_vars($obj);
+                $returnKnownId = false;
                 foreach ($objectArr as $key => $value) {
                     if (gettype($key) == 'string') {
                         $loweredKey = strtolower($key);
                         if ($loweredKey !== $this->idColumn && isset($this->columnArr[$loweredKey])) {
-                            if (isset($this->columnArr[$loweredKey])) {
-                                $insertCols[$loweredKey] = gettype($value) === 'boolean' ? ($value ? 1 : 0) : $value;
-                            }
+                            $insertCols[$loweredKey] = gettype($value) === 'boolean' ? ($value ? 1 : 0) : $value;
                         }
                     }
+                }
+                if ($this->generateGuidsForIds && !isset($insertCols[$this->idColumn])) {
+                    $insertCols[$this->idColumn] = GUIDHelper::GUIDv4();
+                    $returnKnownId = true;
                 }
                 
                 $colCount = count($insertCols);
@@ -329,7 +351,7 @@ abstract class Repo {
                     if ($statement->rowCount() == 0) {
                         throw new \Exception("Failed to insert object into table");
                     } else {
-                        return ResponseInfo::Success($this->db->lastInsertId($this->idColumn));
+                        return ResponseInfo::Success($returnKnownId ? $insertCols[$this->idColumn] : $this->db->lastInsertId($this->idColumn));
                     }
                 } else {
                     throw new \Exception("Invalid object");
@@ -346,14 +368,16 @@ abstract class Repo {
      * Updates a row in the table using sql injection safe column mapping
      * 
      * @param object|null $obj
+     * @param array $filters
      * @return ResponseInfo
      */
-    protected function _update(?object $obj) : ResponseInfo {
+    protected function _update(?object $obj, ?array $filters = null) : ResponseInfo {
         if (isset($obj)) {
             try {
                 $updateCols = array();
                 $objectArr = get_object_vars($obj);
                 $hasId = false;
+                $idValue = null;
                 foreach ($objectArr as $key => $value) {
                     if (gettype($key) == 'string') {
                         $loweredKey = strtolower($key);
@@ -364,7 +388,7 @@ abstract class Repo {
                         } else if (isset($value)) {
                             $idType = getType($value);
                             $hasId = ($idType == 'string' && strlen($idType) > 0) || ($idType == 'int' && $idType > 0);
-                            $updateCols['_id_'] = $value;
+                            $idValue = $value;
                         }
                     }
                 }
@@ -385,8 +409,17 @@ abstract class Repo {
                         }
                         $current++;
                     }
-                    $statement = $this->db->prepare("UPDATE `$this->table` SET $setStr WHERE `$this->idColumn`=:_id_");
-                    $statement->execute($updateCols);
+                    $sql = "UPDATE `$this->table` SET $setStr";
+                    $params = array();
+                    $idFilter = QueryFilter::Filter($this->idColumn, $idValue, '=', '_id_');
+                    $filters = isset($filters) ? array(QueryFilter::FilterGroup(array_merge([$idFilter], $filters), 'AND')) : array($idFilter);
+                    $filterResult = $this->_buildSqlFromQueryFilters($filters);
+                    if (isset($filterResult) && count($filterResult)) {
+                        $sql .= $filterResult['sql'];
+                        $params = $filterResult['params'];
+                    }
+                    $statement = $this->db->prepare($sql);
+                    $statement->execute(array_merge($updateCols, $params));
                     if ($statement->rowCount() == 0) {
                         throw new \Exception("Failed to update object on table");
                     } else {
@@ -407,12 +440,22 @@ abstract class Repo {
      * Deletes a row by id for configured table
      * 
      * @param mixed $id
+     * @param array $filters
      * @return ResponseInfo
      */
-    protected function _delete($id) : ResponseInfo {
+    protected function _delete($id, ?array $filters = null) : ResponseInfo {
         try {
-            $statement = $this->db->prepare("DELETE FROM `$this->table` WHERE `$this->idColumn`=?");
-            $statement->execute([$id]);
+            $sql = "DELETE FROM `$this->table`";
+            $params = null;
+            $idFilter = QueryFilter::Filter($this->idColumn, $id, '=', '_id_');
+            $filters = isset($filters) ? array(QueryFilter::FilterGroup(array_merge([$idFilter], $filters), 'AND')) : array($idFilter);
+            $filterResult = $this->_buildSqlFromQueryFilters($filters);
+            if (isset($filterResult) && count($filterResult)) {
+                $sql .= $filterResult['sql'];
+                $params = $filterResult['params'];
+            }
+            $statement = $this->db->prepare($sql);
+            $statement->execute($params);
             if ($statement->rowCount() > 0) {
                 return ResponseInfo::Success();
             } else {
@@ -444,6 +487,12 @@ class QueryFilter {
      */
     public $value;
     /**
+     * custom key for prepared statement value placeholder
+     *
+     * @var string
+     */
+    public $placeholderOverride;
+    /**
      * Array of QueryFilters
      *
      * @var array
@@ -456,11 +505,12 @@ class QueryFilter {
      */
     public $groupOperator;
 
-    public static function Filter(string $column, string $value, string $operator = '=') : QueryFilter {
+    public static function Filter(string $column, string $value, string $operator = '=', ?string $placeholderOverride = null) : QueryFilter {
         $filter = new QueryFilter();
         $filter->column = $column;
         $filter->value = $value;
         $filter->operator = $operator;
+        $filter->placeholderOverride = $placeholderOverride;
         return $filter;
     }
 
