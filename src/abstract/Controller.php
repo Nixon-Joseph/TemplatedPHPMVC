@@ -16,11 +16,11 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * Handles output caching controller action
      *
      * @param string $key
-     * @param integer $expiresInSeconds
      * @param callable $viewFunc
+     * @param integer $expiresInSeconds
      * @return void
      */
-    protected function outputCache(string $key, int $expiresInSeconds = 120, callable $viewFunc) {
+    protected function outputCache(string $key, callable $viewFunc, int $expiresInSeconds = 120) {
         if (isset($this->cache)) {
             $cachedOutput = $this->cache->GetOutputCache($key);
             if (isset($cachedOutput) && strlen($cachedOutput) > 0) {

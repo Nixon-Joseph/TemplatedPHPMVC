@@ -66,14 +66,11 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase {
      *
      * Source: https://gist.github.com/bubba-h57/32593b2b970366d24be7
      * 
-     * @param string $body
+     * @param mixed $data
      * @param integer $responseCode
-     * @param integer $minutes
-     * @param callable $method
-     * @param mixed|null $callableParams
      * @return void
      */
-    protected function closeConnection($data, $responseCode = "200"): void {
+    protected function closeConnection($data, string $responseCode = "200"): void {
         // Cause we are clever and don't want the rest of the script to be bound by a timeout.
         // Set to zero so no time limit is imposed from here on out.
         set_time_limit(0);

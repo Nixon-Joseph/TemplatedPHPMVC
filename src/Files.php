@@ -115,5 +115,18 @@ class Files {
 		}
 		return false;
 	}
+
+	public static function Fingerprint(string $resourcePath, string $relativeDir = "./", string $fingerprintParam = 'x') {
+		try {
+			$time = filemtime(implode('/', [trim($relativeDir, '/'), trim($resourcePath, '/')]));
+			if (strpos($resourcePath, '?') > 0) { //already has query param
+				$resourcePath .= "&";
+			} else {
+				$resourcePath .= "?";
+			}
+			$resourcePath .= "$fingerprintParam=$time";
+		} catch (\Throwable $th) { }
+		return $resourcePath;
+	}
 }
 ?>

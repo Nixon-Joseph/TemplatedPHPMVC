@@ -227,6 +227,9 @@ class TemplateMVCApp
         return array(
             "get_menu_item_class" => function ( $menuItem ) {
                 return preg_match($menuItem->MatchPattern, $_SERVER['REQUEST_URI']) ? $menuItem->ActiveClass : "";
+            },
+            "fingerprint" => function ( string $resourcePath, string $relativePath = "./", string $paramName = 'x' ) {
+                return Files::Fingerprint($resourcePath, $relativePath, $paramName);
             }
         );
     }
