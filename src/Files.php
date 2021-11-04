@@ -72,7 +72,7 @@ class Files {
 		return $nbsp;
 	}
 	
-	public static function UploadFile($file, string $dir = './upload/', string $filename) {
+	public static function UploadFile($file, string $filename, string $dir = './upload/') {
 		$out = '';
 		$ext = '';
 		$file['name'] = strtolower($file['name']);
