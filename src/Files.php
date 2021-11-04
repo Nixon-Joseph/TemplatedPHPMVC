@@ -85,12 +85,10 @@ class Files {
 				case 4: $out .= "No file uploaded"; break;
 			}
 			return $out;
-			exit;
 		}
 		if ($file['tmp_name'] == 'none') {
 			$out .= "problem: Uploaded file of zero length";
 			return $out;
-			exit;
 		}
 		if (strpos($filename, ".") > 0) {
 			$ext = strrchr($filename, ".");
@@ -99,19 +97,17 @@ class Files {
 		else {
 			$ext = strrchr($file["name"], ".");
 		}
-		$upfile = $dir  .$filename . $ext;
+		$upfile = $dir . $filename . $ext;
 		$out .= "tmp_file -> " . $file['tmp_name'] . "<br />";
 		if (is_uploaded_file($file['tmp_name'])) {
 			$out .= "new_loc -> " . $upfile . "<br />";
 			if (!move_uploaded_file($file['tmp_name'], $upfile)) {
 				$out .= "Problem: Could not move the file";
 				return $out;
-				exit;
 			}
 		} else {
 			$out .= "Problem: Possible file upload attack.<br />\nFilename: ".$file['name']." (".$file['tmp_name'].")";
 			return $out;
-			exit;
 		}
 		return false;
 	}
