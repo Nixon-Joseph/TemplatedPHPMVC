@@ -41,6 +41,14 @@ abstract class Repo {
      */
     protected $generateGuidsForIds;
     /**
+     * Overridible: fixes mappings from PDO class declaration
+     * Most noticable on bit -> bool conversions - bool properties will come
+     * with 1/0 values instead of true/false
+     * 
+     * @var callable
+     */
+    protected $fixPDOMapping;
+    /**
      * @var \PDO
      */
     protected $db;
@@ -54,6 +62,7 @@ abstract class Repo {
         $this->table = isset($table) ? $table : $class . 's';
         $this->table = strtolower($this->table);
         $this->setColumnString($columnArr);
+        $this->fixPDOMapping = function (?object $entity): ?object { return $entity; };
     }
 
     /**
@@ -140,7 +149,7 @@ abstract class Repo {
             $statement = $this->db->prepare($sql);
             $statement->execute($params);
             $objs = $statement->fetchAll(\PDO::FETCH_CLASS, $this->className);
-            return $objs;
+            return array_map($this->fixPDOMapping, $objs);
         } catch (\Throwable $th) {
             return null;
         }
@@ -209,7 +218,7 @@ abstract class Repo {
             $results = $this->_query($sql, $params);
             $totalRecords = $this->_getCount($filters);
 
-            return array("results" => $results, "totalRecords" => $totalRecords, "pages" => ceil($totalRecords / $pageSize));
+            return array("results" => array_map($this->fixPDOMapping, $results), "totalRecords" => $totalRecords, "pages" => ceil($totalRecords / $pageSize));
         } catch (\Throwable $th) {
             return null;
         }
@@ -302,7 +311,26 @@ abstract class Repo {
             $statement->setFetchMode(\PDO::FETCH_CLASS, $this->className);
             $statement->execute([$id]);
             $object = $statement->fetch();
-            return $object;
+            return ($this->fixPDOMapping)($object);
+        } catch (\Throwable $th) {
+            return null;
+        }
+    }
+
+    /**
+     * Queries the table for a particular rows by included ids
+     * Returns an array of instances of the defined class for the repo filled with the row data
+     *
+     * @param array $ids
+     * @return array|null
+     */
+    protected function _getByIds(array $ids) : ?array {
+        try {
+            $in  = str_repeat('?,', count($ids) - 1) . '?';
+            $statement = $this->db->prepare("SELECT $this->columnString FROM `$this->table` WHERE `$this->idColumn` IN ($in)");
+            $statement->execute($ids);
+            $objs = $statement->fetchAll(\PDO::FETCH_CLASS, $this->className);
+            return array_map($this->fixPDOMapping, $objs);
         } catch (\Throwable $th) {
             return null;
         }
