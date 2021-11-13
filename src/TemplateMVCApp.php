@@ -112,8 +112,9 @@ class TemplateMVCApp
                     $class = substr($class, strripos($class, '\\') + 1);
                 }
                 foreach ($this->paths as $path) {
-                    if (file_exists("$path/$class.php")) {
-                        require_once ("$path/$class.php");
+                    $filePath = fileExists("$path/$class.php", false);
+                    if ($filePath) {
+                        require_once ($filePath);
                         break;
                     }
                 }
@@ -200,8 +201,9 @@ class TemplateMVCApp
                 $this->_viewDirectory = 'filenotfound';
                 return new $fnfControllerName();
             };
-    
-            if (file_exists("$controllerPath/" . $this->_controllerName . '.php') === true) {
+            
+            $filePath = fileExists("$controllerPath/" . $this->_controllerName . '.php', false);
+            if ($filePath) {
                 $controller = new $this->_controllerName();
                 if (method_exists($controller, $this->_actionName) === false) {
                     $controller = $fnfControllerFunc($fileNotFoundControllerName);
@@ -233,4 +235,22 @@ class TemplateMVCApp
             }
         );
     }
+}
+
+function fileExists($fileName, $caseSensitive = true) {
+    if(file_exists($fileName)) {
+        return $fileName;
+    }
+    if($caseSensitive) return false;
+
+    // Handle case insensitive requests            
+    $directoryName = dirname($fileName);
+    $fileArray = glob($directoryName . '/*', GLOB_NOSORT);
+    $fileNameLowerCase = strtolower($fileName);
+    foreach($fileArray as $file) {
+        if(strtolower($file) == $fileNameLowerCase) {
+            return $file;
+        }
+    }
+    return false;
 }
