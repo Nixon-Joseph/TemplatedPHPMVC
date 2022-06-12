@@ -19,5 +19,10 @@
             "devpirates\\MVC\\Base\\": "src/abstract/"
         }
     },
-    "require": { }
+    "require": {
+        "liquid/liquid": "^1.4",
+        "pelago/emogrifier": "^5.0",
+        "netresearch/jsonmapper": "^4.0",
+        "zaininnari/html-minifier": "^0.4.2"
+    }
 }
