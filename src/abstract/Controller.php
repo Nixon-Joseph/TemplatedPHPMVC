@@ -35,6 +35,35 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         }
     }
 
+
+    /**
+     * Display partial view for controller action
+     * If array is passed in as $model, it should be ['key' => 'value'] format
+     * 
+     * @param object|array|null $model
+     * @param string $view
+     * @param array|null $viewData
+     * @param boolean $minify
+     * @return string
+     */
+    protected function partial(string $view, $model = null, ?array $viewData = null, bool $minify = true): void {
+        echo $this->getView($model, $view, null, $viewData, $minify);
+    }
+
+    /**
+     * Get partial view for controller action
+     * If array is passed in as $model, it should be ['key' => 'value'] format
+     * 
+     * @param object|array|null $model
+     * @param string $view
+     * @param array|null $viewData
+     * @param boolean $minify
+     * @return string
+     */
+    protected function getPartial(string $view, $model = null, ?array $viewData = null, bool $minify = true): string {
+        return $this->getView($model, $view, null, $viewData, $minify);
+    }
+
     /**
      * Display view for controller action
      * If array is passed in as $model, it should be ['key' => 'value'] format
@@ -56,12 +85,12 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      *
      * @param object|array|null $model
      * @param string $view
-     * @param string $master
+     * @param string|null $master
      * @param array|null $viewData
      * @param boolean $minify
      * @return string
      */
-    protected function getView($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): string {
+    protected function getView($model = null, string $view = ACTION_NAME, $master = "_layout", ?array $viewData = null, bool $minify = true): string {
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
         $viewPath = strlen(AREA) ? (VIEWS_PATH . "/areas/" . AREA) : VIEWS_PATH;
@@ -87,20 +116,24 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         }
         $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
-        if (strpos($master, '/') !== false) {
-            $template->parse(\devpirates\MVC\Files::OpenFile($master));
+        if (isset($master) && strlen($master) > 0) {
+            if (strpos($master, '/') !== false) {
+                $template->parse(\devpirates\MVC\Files::OpenFile($master));
+            } else {
+                $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/shared/$master." . TEMPLATE_EXTENSION));
+            }
+            $output = $template->render(array(
+                'content' => $pageContent,
+                'siteData' => SITE_DATA,
+                'viewData' => $viewData,
+                'menus' => $app->Menus,
+                'scripts' => $this->scripts,
+                'styles' => $this->styles
+            ));
         } else {
-            $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/shared/$master." . TEMPLATE_EXTENSION));
+            $output = $pageContent;
         }
         
-        $output = $template->render(array(
-            'content' => $pageContent,
-            'siteData' => SITE_DATA,
-            'viewData' => $viewData,
-            'menus' => $app->Menus,
-            'scripts' => $this->scripts,
-            'styles' => $this->styles
-        ));
         if ($minify) {
             $output = HTMLMinify::minify($output);
         }

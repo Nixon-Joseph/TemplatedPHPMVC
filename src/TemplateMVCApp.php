@@ -97,7 +97,7 @@ class TemplateMVCApp
         $_paths = array(
             $controllerPath
         );
-        if (isset($this->this->_area) !== null && strlen($this->_area) > 0) {
+        if (isset($this->_area) !== null && strlen($this->_area) > 0) {
             $_paths[] = "$controllerPath/" . $this->_area;
         }
         if (isset($paths) && count($paths) > 0) {
