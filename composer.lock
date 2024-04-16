@@ -4,28 +4,28 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9d57165f0cc76e21a72b7d0a124fb8a2",
+    "content-hash": "899173b29eafc25a389556c52c60197a",
     "packages": [
         {
             "name": "liquid/liquid",
-            "version": "1.4.23",
+            "version": "1.4.42",
             "source": {
                 "type": "git",
                 "url": "https://github.com/kalimatas/php-liquid.git",
-                "reference": "4f5ae8de96031e2985a900427f2d508cf556c100"
+                "reference": "de705d5629f037ce078ae068fd98c6cd2ef6ba51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kalimatas/php-liquid/zipball/4f5ae8de96031e2985a900427f2d508cf556c100",
-                "reference": "4f5ae8de96031e2985a900427f2d508cf556c100",
+                "url": "https://api.github.com/repos/kalimatas/php-liquid/zipball/de705d5629f037ce078ae068fd98c6cd2ef6ba51",
+                "reference": "de705d5629f037ce078ae068fd98c6cd2ef6ba51",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.3 || ^8.0"
+                "php": "^7.4 || ^8.0"
             },
             "require-dev": {
-                "ergebnis/composer-normalize": "^2.8",
-                "friendsofphp/php-cs-fixer": "^2.16.4",
+                "ergebnis/composer-normalize": ">=2.8",
+                "friendsofphp/php-cs-fixer": "^3.22",
                 "infection/infection": ">=0.17.6",
                 "php-coveralls/php-coveralls": "^2.2",
                 "phpunit/phpunit": "^9.2.6"
@@ -71,258 +71,9 @@
             ],
             "support": {
                 "issues": "https://github.com/kalimatas/php-liquid/issues",
-                "source": "https://github.com/kalimatas/php-liquid/tree/1.4.23"
+                "source": "https://github.com/kalimatas/php-liquid/tree/1.4.42"
             },
-            "time": "2021-06-25T06:02:16+00:00"
-        },
-        {
-            "name": "netresearch/jsonmapper",
-            "version": "v4.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cweiske/jsonmapper.git",
-                "reference": "8bbc021a8edb2e4a7ea2f8ad4fa9ec9dce2fcb8d"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cweiske/jsonmapper/zipball/8bbc021a8edb2e4a7ea2f8ad4fa9ec9dce2fcb8d",
-                "reference": "8bbc021a8edb2e4a7ea2f8ad4fa9ec9dce2fcb8d",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "ext-pcre": "*",
-                "ext-reflection": "*",
-                "ext-spl": "*",
-                "php": ">=7.1"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~7.5 || ~8.0 || ~9.0",
-                "squizlabs/php_codesniffer": "~3.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "JsonMapper": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "OSL-3.0"
-            ],
-            "authors": [
-                {
-                    "name": "Christian Weiske",
-                    "email": "cweiske@cweiske.de",
-                    "homepage": "http://github.com/cweiske/jsonmapper/",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Map nested JSON structures onto PHP classes",
-            "support": {
-                "email": "cweiske@cweiske.de",
-                "issues": "https://github.com/cweiske/jsonmapper/issues",
-                "source": "https://github.com/cweiske/jsonmapper/tree/v4.0.0"
-            },
-            "time": "2020-12-01T19:48:11+00:00"
-        },
-        {
-            "name": "pelago/emogrifier",
-            "version": "v5.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MyIntervals/emogrifier.git",
-                "reference": "37595a9bb62c3c25969bdd9e8d7dd24c3ac62bc9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MyIntervals/emogrifier/zipball/37595a9bb62c3c25969bdd9e8d7dd24c3ac62bc9",
-                "reference": "37595a9bb62c3c25969bdd9e8d7dd24c3ac62bc9",
-                "shasum": ""
-            },
-            "require": {
-                "ext-dom": "*",
-                "ext-libxml": "*",
-                "php": "~7.1.0 || ~7.2.0 || ~7.3.0 || ~7.4.0 || ~8.0.0",
-                "symfony/css-selector": "^3.4.32 || ^4.4 || ^5.1"
-            },
-            "require-dev": {
-                "php-parallel-lint/php-parallel-lint": "^1.2.0",
-                "rawr/cross-data-providers": "^2.3.0",
-                "slevomat/coding-standard": "^6.4.1",
-                "squizlabs/php_codesniffer": "^3.5.8"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-main": "6.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Pelago\\Emogrifier\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Oliver Klee",
-                    "email": "github@oliverklee.de"
-                },
-                {
-                    "name": "Zoli Szabó",
-                    "email": "zoli.szabo+github@gmail.com"
-                },
-                {
-                    "name": "John Reeve",
-                    "email": "jreeve@pelagodesign.com"
-                },
-                {
-                    "name": "Jake Hotson",
-                    "email": "jake@qzdesign.co.uk"
-                },
-                {
-                    "name": "Cameron Brooks"
-                },
-                {
-                    "name": "Jaime Prado"
-                }
-            ],
-            "description": "Converts CSS styles into inline style attributes in your HTML code",
-            "homepage": "https://www.myintervals.com/emogrifier.php",
-            "keywords": [
-                "css",
-                "email",
-                "pre-processing"
-            ],
-            "support": {
-                "issues": "https://github.com/MyIntervals/emogrifier/issues",
-                "source": "https://github.com/MyIntervals/emogrifier"
-            },
-            "time": "2021-04-06T08:18:22+00:00"
-        },
-        {
-            "name": "symfony/css-selector",
-            "version": "v5.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/css-selector.git",
-                "reference": "fcd0b29a7a0b1bb5bfbedc6231583d77fea04814"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/fcd0b29a7a0b1bb5bfbedc6231583d77fea04814",
-                "reference": "fcd0b29a7a0b1bb5bfbedc6231583d77fea04814",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\CssSelector\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Jean-François Simon",
-                    "email": "jeanfrancois.simon@sensiolabs.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Converts CSS selectors to XPath expressions",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/css-selector/tree/v5.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2021-05-26T17:40:38+00:00"
-        },
-        {
-            "name": "zaininnari/html-minifier",
-            "version": "0.4.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/zaininnari/html-minifier.git",
-                "reference": "5b94d85705626f9bb33b7c667bc4400088ed4ece"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/zaininnari/html-minifier/zipball/5b94d85705626f9bb33b7c667bc4400088ed4ece",
-                "reference": "5b94d85705626f9bb33b7c667bc4400088ed4ece",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "satooshi/php-coveralls": "dev-master"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "zz": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "The BSD 3-Clause License"
-            ],
-            "authors": [
-                {
-                    "name": "Google inc",
-                    "homepage": "http://www.chromium.org/blink",
-                    "role": "Author"
-                },
-                {
-                    "name": "zaininnari",
-                    "homepage": "https://github.com/zaininnari/",
-                    "role": "Developer"
-                }
-            ],
-            "description": "The Blink HTMLTokenizer ported to PHP.",
-            "homepage": "https://github.com/zaininnari/html-minifier",
-            "keywords": [
-                "Blink",
-                "HTML minify",
-                "php"
-            ],
-            "support": {
-                "issues": "https://github.com/zaininnari/html-minifier/issues",
-                "source": "https://github.com/zaininnari/html-minifier/tree/travis"
-            },
-            "time": "2015-08-18T14:10:55+00:00"
+            "time": "2024-03-19T10:22:06+00:00"
         }
     ],
     "packages-dev": [],
@@ -333,5 +84,5 @@
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.6.0"
 }

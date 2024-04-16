@@ -19,5 +19,7 @@
             "devpirates\\MVC\\Base\\": "src/abstract/"
         }
     },
-    "require": { }
+    "require": { 
+        "liquid/liquid": "^1.4"
+    }
 }
