@@ -216,10 +216,6 @@ class TemplateMVCApp
             define('VIEW_DIRECTORY', $this->_viewDirectory);
             call_user_func_array(array($controller, $this->_actionName), !empty($this->_routeParams) ? explode('/', $this->_routeParams) : []);
         } catch (\Throwable $th) {
-            echo "<pre>";
-            var_dump($th);
-            echo "</pre>";
-            die();
             http_response_code(HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
