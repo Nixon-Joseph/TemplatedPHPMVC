@@ -143,7 +143,6 @@ class TemplateMVCApp
             $this->sessionName = $sessionId;
             $this->DB = new \PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->DB->query('SET NAMES utf8');
-            $this->DB->query('SET CHARACTER_SET utf8_unicode_ci');
 
             // TODO: Remove for production
             // $this->DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
