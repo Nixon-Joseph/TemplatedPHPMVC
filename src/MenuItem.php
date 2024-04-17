@@ -1,5 +1,9 @@
-<?php namespace devpirates\MVC;
-class MenuItem {
+<?php
+
+namespace devpirates\MVC;
+
+class MenuItem
+{
     /**
      * class used for current nav item
      *
@@ -32,7 +36,8 @@ class MenuItem {
      */
     public $Icon;
 
-    public function __construct(string $name, string $link, ?string $activeClass = null, ?string $icon = null, string $matchPattern = null) {
+    public function __construct(string $name, string $link, ?string $activeClass = null, ?string $icon = null, string $matchPattern = null)
+    {
         $this->Name = $name;
         $this->Link = $link;
         $this->ActiveClass = isset($activeClass) && strlen($activeClass) ? $activeClass : '';
@@ -40,4 +45,3 @@ class MenuItem {
         $this->MatchPattern = "/^" . (isset($matchPattern) && strlen($matchPattern) ? $matchPattern : preg_replace('/\//', '\/', $link)) . "$/i";
     }
 }
-?>

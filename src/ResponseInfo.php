@@ -1,10 +1,12 @@
 <?php
+
 namespace devpirates\MVC;
 
 /**
  * This class is used to return useful information from DB transactions
  */
-class ResponseInfo {
+class ResponseInfo
+{
     /**
      * Id value of transaction
      *
@@ -23,8 +25,9 @@ class ResponseInfo {
      * @var bool
      */
     public $Success;
-    
-    public function __construct(bool $success = false, ?string $id = "", ?string $message = "") {
+
+    public function __construct(bool $success = false, ?string $id = "", ?string $message = "")
+    {
         $this->Id = $id;
         $this->Message = $message;
         $this->Success = $success;
@@ -37,7 +40,8 @@ class ResponseInfo {
      * @param string|null $message
      * @return ResponseInfo
      */
-    public static function Success(?string $id = "", ?string $message = "") : ResponseInfo {
+    public static function Success(?string $id = "", ?string $message = ""): ResponseInfo
+    {
         return new ResponseInfo(true, $id, $message);
     }
 
@@ -47,8 +51,8 @@ class ResponseInfo {
      * @param string $message
      * @return ResponseInfo
      */
-    public static function Error(string $message) : ResponseInfo {
+    public static function Error(string $message): ResponseInfo
+    {
         return new ResponseInfo(false, null, $message);
     }
 }
-?>

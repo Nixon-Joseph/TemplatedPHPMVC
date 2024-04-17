@@ -1,4 +1,7 @@
-<?php namespace devpirates\MVC;
+<?php
+
+namespace devpirates\MVC;
+
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
@@ -114,7 +117,7 @@ class TemplateMVCApp
                 foreach ($this->paths as $path) {
                     $filePath = fileExists("$path/$class.php", false);
                     if ($filePath) {
-                        require_once ($filePath);
+                        require_once($filePath);
                         break;
                     }
                 }
@@ -150,7 +153,7 @@ class TemplateMVCApp
             echo 'Connection error: ' . $e->getMessage();
         }
     }
-    
+
     /**
      * Set up session
      *
@@ -180,27 +183,27 @@ class TemplateMVCApp
         try {
             $this->Menus = $menus;
             define("VIEWS_PATH", $viewsPath);
-    
+
             if (isset($siteData) && count($siteData) > 0) {
                 define("SITE_DATA", $siteData);
             }
-    
+
             session_name($this->sessionName);
             session_start();
             define('AREA', $this->_area);
-    
+
             $controllerPath = $this->controllerPath;
             if (AREA != null && strlen(AREA) > 0) {
                 $controllerPath .= "/" . AREA;
             }
-    
+
             $fnfControllerFunc = function ($fnfControllerName) {
                 $this->_actionName = 'index';
                 $this->_routeParams = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
                 $this->_viewDirectory = 'filenotfound';
                 return new $fnfControllerName();
             };
-            
+
             $filePath = fileExists("$controllerPath/" . $this->_controllerName . '.php', false);
             if ($filePath) {
                 $controller = new $this->_controllerName();
@@ -216,34 +219,40 @@ class TemplateMVCApp
             define('VIEW_DIRECTORY', $this->_viewDirectory);
             call_user_func_array(array($controller, $this->_actionName), !empty($this->_routeParams) ? explode('/', $this->_routeParams) : []);
         } catch (\Throwable $th) {
+            // echo "<pre>";
+            // var_dump($th);
+            // echo "</pre>";
+            // die();
             http_response_code(HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
 
-    public function GetBaseLiquidFilters(): array {
+    public function GetBaseLiquidFilters(): array
+    {
         return array(
-            "get_menu_item_class" => function ( $menuItem ) {
+            "get_menu_item_class" => function ($menuItem) {
                 return preg_match($menuItem->MatchPattern, $_SERVER['REQUEST_URI']) ? $menuItem->ActiveClass : "";
             },
-            "fingerprint" => function ( string $resourcePath, string $relativePath = "./", string $paramName = 'x' ) {
+            "fingerprint" => function (string $resourcePath, string $relativePath = "./", string $paramName = 'x') {
                 return Files::Fingerprint($resourcePath, $relativePath, $paramName);
             }
         );
     }
 }
 
-function fileExists($fileName, $caseSensitive = true) {
-    if(file_exists($fileName)) {
+function fileExists($fileName, $caseSensitive = true)
+{
+    if (file_exists($fileName)) {
         return $fileName;
     }
-    if($caseSensitive) return false;
+    if ($caseSensitive) return false;
 
     // Handle case insensitive requests            
     $directoryName = dirname($fileName);
     $fileArray = glob($directoryName . '/*', GLOB_NOSORT);
     $fileNameLowerCase = strtolower($fileName);
-    foreach($fileArray as $file) {
-        if(strtolower($file) == $fileNameLowerCase) {
+    foreach ($fileArray as $file) {
+        if (strtolower($file) == $fileNameLowerCase) {
             return $file;
         }
     }

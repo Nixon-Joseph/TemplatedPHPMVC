@@ -20,6 +20,7 @@
         }
     },
     "require": { 
-        "liquid/liquid": "^1.4"
+        "liquid/liquid": "^1.4",
+        "netresearch/jsonmapper": "^4.4"
     }
 }

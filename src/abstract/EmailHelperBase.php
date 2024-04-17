@@ -1,8 +1,13 @@
-<?php namespace devpirates\MVC\Base;
-use Pelago\Emogrifier\CssInliner;
+<?php
 
-abstract class EmailHelperBase {
-    protected static function _BuildEmail(string $emailContent, array $siteData, ?array $emailData = null): string {
+namespace devpirates\MVC\Base;
+
+// use Pelago\Emogrifier\CssInliner;
+
+abstract class EmailHelperBase
+{
+    protected static function _BuildEmail(string $emailContent, array $siteData, ?array $emailData = null): string
+    {
         foreach ($siteData as $key => $value) {
             $emailContent = str_replace("[$key]", $value, $emailContent);
         }
@@ -14,15 +19,16 @@ abstract class EmailHelperBase {
         return $emailContent;
     }
 
-    protected static function _SendEmail(string $emailContent, string $subject, string $to, string $from, bool $isHtml, ?string $replyTo = null, ?string $cc = null, ?string $bcc = null, ?callable $onException = null): bool {
+    protected static function _SendEmail(string $emailContent, string $subject, string $to, string $from, bool $isHtml, ?string $replyTo = null, ?string $cc = null, ?string $bcc = null, ?callable $onException = null): bool
+    {
         $success = false;
         try {
             $body = $emailContent;
-        
+
             $headers = array();
             $headers[] = "From: $from";
             if ($isHtml) {
-                $body = CssInliner::fromHtml($emailContent)->inlineCss()->render();
+                $body = $emailContent; //CssInliner::fromHtml($emailContent)->inlineCss()->render();
                 $headers[] = 'MIME-Version: 1.0';
                 $headers[] = 'Content-type: text/html; charset=UTF-8';
                 $headers[] = "Content-Transfer-Encoding: base64";
@@ -45,4 +51,3 @@ abstract class EmailHelperBase {
         return $success;
     }
 }
-?>

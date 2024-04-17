@@ -1,9 +1,13 @@
-<?php namespace devpirates\MVC;
+<?php
+
+namespace devpirates\MVC;
+
 /**
  * https://www.php.net/manual/en/function.http-response-code.php
  * "Enum" of HttpStatusCodes
  */
-class HttpStatusCode {
+class HttpStatusCode
+{
     public const SWITCHING_PROTOCOLS = 101;
     public const OK = 200;
     public const CREATED = 201;
@@ -45,4 +49,3 @@ class HttpStatusCode {
     public const GATEWAY_TIMEOUT = 504;
     public const HTTP_VERSION_NOT_SUPPORTED = 505;
 }
-?>

@@ -1,153 +1,160 @@
 <?php
-    namespace devpirates\MVC;
 
-    use \Error;
+namespace devpirates\MVC;
 
-    class HttpUtil {
-        static public ?array $GetAfter = null;
+use \Error;
 
-        /** @noinspection MissingParameterTypeDeclarationInspection */
-        public static function GetURL(string $URI, $Context):string {
-            try {
-                $HTTPRequest = @fopen($URI, 'rb', false, $Context);
-                $DataStream  = fopen("php://memory", "rb+");
+class HttpUtil
+{
+    static public ?array $GetAfter = null;
 
-                if (!$HTTPRequest) {
-                    $HTTPRequest = fopen("php://memory", "wb+");
+    /** @noinspection MissingParameterTypeDeclarationInspection */
+    public static function GetURL(string $URI, $Context): string
+    {
+        try {
+            $HTTPRequest = @fopen($URI, 'rb', false, $Context);
+            $DataStream  = fopen("php://memory", "rb+");
 
-                    fprintf($HTTPRequest, "Failed to load resource.");
+            if (!$HTTPRequest) {
+                $HTTPRequest = fopen("php://memory", "wb+");
 
-                    rewind($DataStream);
-                }
-
-                stream_copy_to_stream($HTTPRequest, $DataStream);
+                fprintf($HTTPRequest, "Failed to load resource.");
 
                 rewind($DataStream);
+            }
 
-                return stream_get_contents($DataStream);
-            }
-            catch (Error $e) {
-                return $e->getMessage();
-            }
+            stream_copy_to_stream($HTTPRequest, $DataStream);
+
+            rewind($DataStream);
+
+            return stream_get_contents($DataStream);
+        } catch (Error $e) {
+            return $e->getMessage();
+        }
+    }
+
+    // /**
+    // * @noinspection MissingReturnTypeInspection
+    // *
+    // * @returns resource Context
+    // */
+    // public static function CreateContext() {
+    //     $Options = [
+    //         'http' => [
+    //         'method' => 'GET',
+    //         'timeout' => 120,
+    //         'user_agent' => '...',
+    //         'protocol_version' => 1.0,
+    //         'header' => [
+    //             "Referer: {$_SERVER['SERVER_NAME']}"
+    //         ]
+    //         ]
+    //     ];
+
+    //     return stream_context_create($Options);
+    // }
+
+    // /**
+    // * @noinspection MissingReturnTypeInspection
+    // *
+    // * @returns resource Context with auth
+    // */
+    // public static function CreateAuthContext() {
+    //     $UserName = ASD;
+    //     $Password = DecryptAuth(ASD_PASS);
+
+    //     $SessionCookieName = session_name();
+    //     $SessionId = session_id();
+
+    //     $Auth = base64_encode("{$UserName}:{$Password}");
+
+    //     $Options = [
+    //         'http' => [
+    //         'method' => 'GET',
+    //         'timeout' => 120,
+    //         'user_agent' => '...',
+    //         'protocol_version' => 1.0,
+    //         'header' => [
+    //             "Referer: {$_SERVER['SERVER_NAME']}",
+    //             "Cookie: {$SessionCookieName}={$SessionId}",
+    //             "Authorization: Basic {$Auth}"
+    //         ]
+    //         ]
+    //     ];
+
+    //     return stream_context_create($Options);
+    // }
+
+    public static function HasAfter(): bool
+    {
+        return self::$GetAfter !== null && count(self::$GetAfter);
+    }
+
+    public static function AddResults(string $JSName, string $Results): bool
+    {
+        if (self::$GetAfter === null) {
+            self::$GetAfter = [];
         }
 
-        // /**
-        // * @noinspection MissingReturnTypeInspection
-        // *
-        // * @returns resource Context
-        // */
-        // public static function CreateContext() {
-        //     $Options = [
-        //         'http' => [
-        //         'method' => 'GET',
-        //         'timeout' => 120,
-        //         'user_agent' => '...',
-        //         'protocol_version' => 1.0,
-        //         'header' => [
-        //             "Referer: {$_SERVER['SERVER_NAME']}"
-        //         ]
-        //         ]
-        //     ];
+        self::$GetAfter[] = [
+            "Name"    => $JSName,
+            "Default" => $Results,
+        ];
 
-        //     return stream_context_create($Options);
+        return true;
+    }
+
+    /**
+     * @noinspection MissingParameterTypeDeclarationInspection
+     */
+    public static function AddResultsAfter(string $JSName, ?string $URI, $Context = null, string $Default = 'undefined'): bool
+    {
+        if (self::$GetAfter === null) {
+            self::$GetAfter = [];
+        }
+
+        // if ($Context === null) {
+        //     $Context = self::CreateContext();
         // }
 
-        // /**
-        // * @noinspection MissingReturnTypeInspection
-        // *
-        // * @returns resource Context with auth
-        // */
-        // public static function CreateAuthContext() {
-        //     $UserName = ASD;
-        //     $Password = DecryptAuth(ASD_PASS);
+        self::$GetAfter[] = [
+            "Name"    => $JSName,
+            "Default" => $Default,
+            "URI"     => $URI,
+            "Context" => $Context,
+        ];
 
-        //     $SessionCookieName = session_name();
-        //     $SessionId = session_id();
+        return true;
+    }
 
-        //     $Auth = base64_encode("{$UserName}:{$Password}");
-
-        //     $Options = [
-        //         'http' => [
-        //         'method' => 'GET',
-        //         'timeout' => 120,
-        //         'user_agent' => '...',
-        //         'protocol_version' => 1.0,
-        //         'header' => [
-        //             "Referer: {$_SERVER['SERVER_NAME']}",
-        //             "Cookie: {$SessionCookieName}={$SessionId}",
-        //             "Authorization: Basic {$Auth}"
-        //         ]
-        //         ]
-        //     ];
-
-        //     return stream_context_create($Options);
-        // }
-
-        public static function HasAfter(): bool {
-            return self::$GetAfter !== null && count(self::$GetAfter);
+    public static function AddResultsCallAfter(string $JSName, array $Function, ?array $Arguments = null, bool $Serialize = true): bool
+    {
+        if (self::$GetAfter === null) {
+            self::$GetAfter = [];
         }
 
-        public static function AddResults(string $JSName, string $Results): bool {
-            if (self::$GetAfter === null) {
-                self::$GetAfter = [];
-            }
+        self::$GetAfter[] = [
+            "Name"      => $JSName,
+            "Arguments" => $Arguments,
+            "Function"  => $Function,
+            "Serialize" => $Serialize
+        ];
 
-            self::$GetAfter[] = [
-                "Name"    => $JSName,
-                "Default" => $Results,
-            ];
+        return true;
+    }
 
-            return true;
+    public static function GetResults(): array
+    {
+        if (!self::HasAfter()) {
+            return [];
         }
 
-        /**
-        * @noinspection MissingParameterTypeDeclarationInspection
-        */
-        public static function AddResultsAfter(string $JSName, ?string $URI, $Context = null, string $Default = 'undefined'): bool {
-            if (self::$GetAfter === null) {
-                self::$GetAfter = [];
-            }
+        $Data = [];
 
-            // if ($Context === null) {
-            //     $Context = self::CreateContext();
-            // }
+        foreach (self::$GetAfter as $GetItem) {
+            $Result = null;
 
-            self::$GetAfter[] = [
-                "Name"    => $JSName,
-                "Default" => $Default,
-                "URI"     => $URI,
-                "Context" => $Context,
-            ];
-
-            return true;
-        }
-
-        public static function AddResultsCallAfter(string $JSName, array $Function, ?array $Arguments = null, bool $Serialize = true): bool {
-            if (self::$GetAfter === null) {
-                self::$GetAfter = [];
-            }
-
-            self::$GetAfter[] = [
-                "Name"      => $JSName,
-                "Arguments" => $Arguments,
-                "Function"  => $Function,
-                "Serialize" => $Serialize
-            ];
-
-            return true;
-        }
-
-        public static function GetResults(): array {
-            if (!self::HasAfter()) {
-                return [];
-            }
-
-            $Data = [];
-
-            foreach(self::$GetAfter as $GetItem) {
-                $Result = null;
-
-                if (isset($GetItem["Function"])) {
+            if (isset($GetItem["Function"])) {
                 [$Class, $Func] = $GetItem["Function"];
 
                 $Object = new $Class;
@@ -156,28 +163,24 @@
 
                 if ($GetItem['Arguments'] !== null) {
                     $Result = call_user_func_array($Callable, $GetItem['Arguments']);
-                }
-                else {
+                } else {
                     $Result = $Callable();
                 }
 
                 if ($GetItem["Serialize"]) {
                     $Result = $Result->serialize();
                 }
-                }
-                else if (isset($GetItem["URI"])) {
+            } else if (isset($GetItem["URI"])) {
                 $Result = self::GetURL($GetItem["URI"], $GetItem["Context"]);
-                }
-
-                if ($Result) {
-                $Data[] = "{$GetItem['Name']} = {$Result}";
-                }
-                else {
-                $Data[] = "{$GetItem['Name']} = {$GetItem['Default']}";
-                }
             }
 
-            return $Data;
+            if ($Result) {
+                $Data[] = "{$GetItem['Name']} = {$Result}";
+            } else {
+                $Data[] = "{$GetItem['Name']} = {$GetItem['Default']}";
+            }
         }
+
+        return $Data;
     }
-?>
+}

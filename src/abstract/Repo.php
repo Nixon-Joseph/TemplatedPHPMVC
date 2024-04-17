@@ -1,9 +1,12 @@
-<?php namespace devpirates\MVC\Base;
+<?php
+
+namespace devpirates\MVC\Base;
 
 use devpirates\MVC\GUIDHelper;
 use \devpirates\MVC\ResponseInfo;
 
-abstract class Repo {
+abstract class Repo
+{
     /**
      * Class name for PDO to map to
      * 
@@ -53,7 +56,8 @@ abstract class Repo {
      */
     protected $db;
 
-    protected function __construct(string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null) {
+    protected function __construct(string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null)
+    {
         global $app;
         $this->db = $app->DB;
         $this->className = $class;
@@ -62,7 +66,9 @@ abstract class Repo {
         $this->table = isset($table) ? $table : $class . 's';
         $this->table = strtolower($this->table);
         $this->setColumnString($columnArr);
-        $this->fixPDOMapping = function (?object $entity): ?object { return $entity; };
+        $this->fixPDOMapping = function (?object $entity): ?object {
+            return $entity;
+        };
     }
 
     /**
@@ -70,14 +76,16 @@ abstract class Repo {
      *
      * @param array|null $columnArr
      */
-    private function setColumnString(?array $columnArr) {
+    private function setColumnString(?array $columnArr)
+    {
         // If defined columns have not been passed in, reflect them
         if (isset($columnArr) == false || count($columnArr) <= 0) {
             $obj = null;
             try { // try to instantiate a new object from the class name
                 $className = $this->className;
                 $obj = new $className();
-            } catch (\Throwable $th) { }
+            } catch (\Throwable $th) {
+            }
             if (isset($obj) && is_object($obj)) { // if the object exists
                 $reflect = new \ReflectionClass($obj); // build reflection object
                 $props   = $reflect->getProperties(\ReflectionProperty::IS_PUBLIC); // get public properties
@@ -123,7 +131,8 @@ abstract class Repo {
      * @param array|null $params
      * @return ResponseInfo
      */
-    protected function _execute(string $sql, ?array $params = null) : ResponseInfo {
+    protected function _execute(string $sql, ?array $params = null): ResponseInfo
+    {
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute($params);
@@ -144,7 +153,8 @@ abstract class Repo {
      * @param array|null $params
      * @return array|null
      */
-    protected function _query(string $sql, ?array $params = null) : ?array {
+    protected function _query(string $sql, ?array $params = null): ?array
+    {
         try {
             $statement = $this->db->prepare($sql);
             $statement->execute($params);
@@ -164,7 +174,8 @@ abstract class Repo {
      * @param array $filters - array of QueryFilter
      * @return array|null
      */
-    protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true, ?array $filters = null) : ?array {
+    protected function _getAll(?int $limit = 0, ?string $orderByCol = null, bool $orderByAscending = true, ?array $filters = null): ?array
+    {
         $sql = "SELECT $this->columnString FROM `$this->table`";
         $params = null;
         if (isset($filters) && count($filters) > 0) {
@@ -196,7 +207,8 @@ abstract class Repo {
      * @param array $filters - array of QueryFilter
      * @return array|null
      */
-    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol, bool $orderByAscending = true, ?array $filters = null) : ?array {
+    protected function _getAllPaged(int $page, int $pageSize, string $orderByCol, bool $orderByAscending = true, ?array $filters = null): ?array
+    {
         try {
             $sql = "SELECT $this->columnString FROM `$this->table`";
             $params = null;
@@ -234,7 +246,8 @@ abstract class Repo {
      * @param string $groupOperator
      * @return array|null
      */
-    protected function _buildSqlFromQueryFilters(array $filters, bool $hasWhere = false, int $depth = 0, array $params = null, string $groupOperator = null) : ?array {
+    protected function _buildSqlFromQueryFilters(array $filters, bool $hasWhere = false, int $depth = 0, array $params = null, string $groupOperator = null): ?array
+    {
         if (isset($filters) && count($filters) > 0) {
             $sql = "";
             $addedFilters = false;
@@ -268,7 +281,7 @@ abstract class Repo {
             }
             if ($addedFilters) {
                 return array('sql' => $sql, 'params' => $params);
-            } 
+            }
         }
         return null;
     }
@@ -279,7 +292,8 @@ abstract class Repo {
      * @param array $filters
      * @return integer
      */
-    protected function _getCount(?array $filters = null) : int {
+    protected function _getCount(?array $filters = null): int
+    {
         try {
             $sql = "SELECT COUNT($this->idColumn) FROM `$this->table`";
             $params = null;
@@ -305,7 +319,8 @@ abstract class Repo {
      * @param string|int $id
      * @return object|null
      */
-    protected function _getById($id) : ?object {
+    protected function _getById($id): ?object
+    {
         try {
             $statement = $this->db->prepare("SELECT $this->columnString FROM `$this->table` WHERE `$this->idColumn`=? LIMIT 1");
             $statement->setFetchMode(\PDO::FETCH_CLASS, $this->className);
@@ -324,7 +339,8 @@ abstract class Repo {
      * @param array $ids
      * @return array|null
      */
-    protected function _getByIds(array $ids) : ?array {
+    protected function _getByIds(array $ids): ?array
+    {
         try {
             $in  = str_repeat('?,', count($ids) - 1) . '?';
             $statement = $this->db->prepare("SELECT $this->columnString FROM `$this->table` WHERE `$this->idColumn` IN ($in)");
@@ -342,7 +358,8 @@ abstract class Repo {
      * @param object|null $obj
      * @return ResponseInfo
      */
-    protected function _insert(?object $obj) : ResponseInfo {
+    protected function _insert(?object $obj): ResponseInfo
+    {
         if (isset($obj)) {
             try {
                 $insertCols = array();
@@ -360,7 +377,7 @@ abstract class Repo {
                     $insertCols[$this->idColumn] = GUIDHelper::GUIDv4();
                     $returnKnownId = true;
                 }
-                
+
                 $colCount = count($insertCols);
                 if ($colCount > 0) {
                     $colStr = '';
@@ -399,7 +416,8 @@ abstract class Repo {
      * @param array $filters
      * @return ResponseInfo
      */
-    protected function _update(?object $obj, ?array $filters = null) : ResponseInfo {
+    protected function _update(?object $obj, ?array $filters = null): ResponseInfo
+    {
         if (isset($obj)) {
             try {
                 $updateCols = array();
@@ -415,7 +433,7 @@ abstract class Repo {
                             }
                         } else if (isset($value)) {
                             $idType = getType($value);
-                            $hasId = ($idType == 'string' && strlen($idType) > 0) || ($idType == 'int' && $idType > 0);
+                            $hasId = ($idType == 'string' && strlen($idType) > 0) || (($idType == 'int' || $idType == 'integer') && $idType > 0);
                             $idValue = $value;
                         }
                     }
@@ -423,7 +441,7 @@ abstract class Repo {
                 if ($hasId === false) {
                     throw new \Exception("Object has no id value");
                 }
-                
+
                 $colCount = count($updateCols);
                 if ($colCount > 0) {
                     $setStr = '';
@@ -471,7 +489,8 @@ abstract class Repo {
      * @param array $filters
      * @return ResponseInfo
      */
-    protected function _delete($id, ?array $filters = null) : ResponseInfo {
+    protected function _delete($id, ?array $filters = null): ResponseInfo
+    {
         try {
             $sql = "DELETE FROM `$this->table`";
             $params = null;
@@ -495,7 +514,8 @@ abstract class Repo {
     }
 }
 
-class QueryFilter {
+class QueryFilter
+{
     /**
      * Column name for comparison
      * 
@@ -533,7 +553,8 @@ class QueryFilter {
      */
     public $groupOperator;
 
-    public static function Filter(string $column, string $value, string $operator = '=', ?string $placeholderOverride = null) : QueryFilter {
+    public static function Filter(string $column, string $value, string $operator = '=', ?string $placeholderOverride = null): QueryFilter
+    {
         $filter = new QueryFilter();
         $filter->column = $column;
         $filter->value = $value;
@@ -542,12 +563,11 @@ class QueryFilter {
         return $filter;
     }
 
-    public static function FilterGroup(array $filters, string $groupOperator = 'AND') : QueryFilter {
+    public static function FilterGroup(array $filters, string $groupOperator = 'AND'): QueryFilter
+    {
         $filter = new QueryFilter();
         $filter->filters = $filters;
         $filter->groupOperator = $groupOperator;
         return $filter;
     }
 }
-
-?>

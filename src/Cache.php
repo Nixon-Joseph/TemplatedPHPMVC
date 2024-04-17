@@ -1,19 +1,26 @@
-<?php namespace devpirates\MVC;
-class Cache {
+<?php
+
+namespace devpirates\MVC;
+
+class Cache
+{
     private $cacheLoc;
 
-    public function __construct(string $cacheLoc) {
+    public function __construct(string $cacheLoc)
+    {
         $this->cacheLoc = $cacheLoc;
         if (!file_exists($cacheLoc)) {
             mkdir($cacheLoc);
         }
     }
 
-    private function getOutputCacheFilename(string $key): string {
+    private function getOutputCacheFilename(string $key): string
+    {
         return "$this->cacheLoc/output-$key.cache";
     }
 
-    public function GetOutputCache(string $key): ?string {
+    public function GetOutputCache(string $key): ?string
+    {
         $filename = $this->getOutputCacheFilename($key);
         if (file_exists($filename)) {
             $contents = file_get_contents($filename);
@@ -35,19 +42,20 @@ class Cache {
         return null;
     }
 
-    public function SetOutputCache(string $key, int $secondsToLive, string $contents) {
+    public function SetOutputCache(string $key, int $secondsToLive, string $contents)
+    {
         $filename = $this->getOutputCacheFilename($key);
         try {
             $cacheFile = fopen($filename, 'w');
             fwrite($cacheFile, new OutputCacheObject($contents, time() + $secondsToLive));
         } catch (\Throwable $th) {
-            
         } finally {
             fclose($cacheFile);
         }
     }
 
-    public function ClearOutputCache(string $key): bool {
+    public function ClearOutputCache(string $key): bool
+    {
         $filename = $this->getOutputCacheFilename($key);
         if (file_exists($filename)) {
             return unlink($filename);
@@ -55,7 +63,8 @@ class Cache {
         return false;
     }
 
-    public function ClearAllOutputCache(): bool {
+    public function ClearAllOutputCache(): bool
+    {
         if ($dir = opendir($this->cacheLoc)) {
             while (($file = readdir($dir)) !== false) {
                 if (unlink($file) === false) {
@@ -67,13 +76,15 @@ class Cache {
     }
 }
 
-class OutputCacheObject extends CacheObjectBase {
+class OutputCacheObject extends CacheObjectBase
+{
     /**
      * @var string
      */
     public $Value;
 
-    public function __construct(?string $value = null, ?int $expiryTime = -1) {
+    public function __construct(?string $value = null, ?int $expiryTime = -1)
+    {
         if (!isset($expiryTime) || $expiryTime <= 0) {
             $expiryTime = (Time() + 120);
         }
@@ -81,23 +92,26 @@ class OutputCacheObject extends CacheObjectBase {
         $this->Value = $value;
     }
 
-    public static function FromString(string $json): ?OutputCacheObject {
+    public static function FromString(string $json): ?OutputCacheObject
+    {
         try {
             $data = json_decode($json, true);
-            return new OutputCacheObject($data{'Value'}, $data{'Expiry'});
+            return new OutputCacheObject($data['Value'], $data['Expiry']);
         } catch (\Throwable $th) {
             return null;
         }
     }
 }
 
-class CacheObject extends CacheObjectBase {
+class CacheObject extends CacheObjectBase
+{
     /**
      * @var object
      */
     public $Value;
 
-    public function __construct(?object $value = null, ?int $expiryTime = -1) {
+    public function __construct(?object $value = null, ?int $expiryTime = -1)
+    {
         if (!isset($expiryTime) || $expiryTime <= 0) {
             $expiryTime = (Time() + 120);
         }
@@ -105,7 +119,8 @@ class CacheObject extends CacheObjectBase {
         $this->Value = $value;
     }
 
-    public static function FromString(string $json, object $mapToObj): ?CacheObject {
+    public static function FromString(string $json, object $mapToObj): ?CacheObject
+    {
         try {
             $data = json_decode($json, true);
             $jm = new \JsonMapper();
@@ -116,17 +131,20 @@ class CacheObject extends CacheObjectBase {
     }
 }
 
-abstract class CacheObjectBase {
+abstract class CacheObjectBase
+{
     /**
      * @var int
      */
     public $Expiry;
 
-    public function __construct(int $expiryTime) {
+    public function __construct(int $expiryTime)
+    {
         $this->Expiry = $expiryTime;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         try {
             return json_encode($this);
         } catch (\Throwable $th) {
@@ -134,4 +152,3 @@ abstract class CacheObjectBase {
         }
     }
 }
-?>

@@ -1,8 +1,11 @@
-<?php  namespace devpirates\MVC\Base;
+<?php
+
+namespace devpirates\MVC\Base;
 
 use zz\Html\HTMLMinify;
 
-abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
+abstract class Controller extends \devpirates\MVC\Base\ControllerBase
+{
     protected $pageTitle;
     protected $pageName;
     protected $scripts = array();
@@ -20,7 +23,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param integer $expiresInSeconds
      * @return void
      */
-    protected function outputCache(string $key, callable $viewFunc, int $expiresInSeconds = 120) {
+    protected function outputCache(string $key, callable $viewFunc, int $expiresInSeconds = 120)
+    {
         if (isset($this->cache)) {
             $cachedOutput = $this->cache->GetOutputCache($key);
             if (isset($cachedOutput) && strlen($cachedOutput) > 0) {
@@ -46,7 +50,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param boolean $minify
      * @return string
      */
-    protected function partial(string $view, $model = null, ?array $viewData = null, bool $minify = true): void {
+    protected function partial(string $view, $model = null, ?array $viewData = null, bool $minify = true): void
+    {
         echo $this->getView($model, $view, null, $viewData, $minify);
     }
 
@@ -60,7 +65,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param boolean $minify
      * @return string
      */
-    protected function getPartial(string $view, $model = null, ?array $viewData = null, bool $minify = true): string {
+    protected function getPartial(string $view, $model = null, ?array $viewData = null, bool $minify = true): string
+    {
         return $this->getView($model, $view, null, $viewData, $minify);
     }
 
@@ -75,7 +81,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param boolean $minify
      * @return void
      */
-    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): void {
+    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): void
+    {
         echo $this->getView($model, $view, $master, $viewData, $minify);
     }
 
@@ -90,7 +97,8 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
      * @param boolean $minify
      * @return string
      */
-    protected function getView($model = null, string $view = ACTION_NAME, $master = "_layout", ?array $viewData = null, bool $minify = true): string {
+    protected function getView($model = null, string $view = ACTION_NAME, $master = "_layout", ?array $viewData = null, bool $minify = true): string
+    {
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
         $viewPath = strlen(AREA) ? (VIEWS_PATH . "/areas/" . AREA) : VIEWS_PATH;
@@ -112,7 +120,7 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
             $template->parse(\devpirates\MVC\Files::OpenFile($view));
         } else {
             $folderName = VIEW_DIRECTORY;
-            $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/$folderName/$view." . TEMPLATE_EXTENSION)); 
+            $template->parse(\devpirates\MVC\Files::OpenFile($viewPath . "/$folderName/$view." . TEMPLATE_EXTENSION));
         }
         $pageContent = $template->render(array('model' => $model, 'view_data' => $viewData));
 
@@ -133,11 +141,10 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase {
         } else {
             $output = $pageContent;
         }
-        
-        if ($minify) {
-            $output = HTMLMinify::minify($output);
-        }
+
+        // if ($minify) {
+        //     $output = HTMLMinify::minify($output);
+        // }
         return $output;
     }
 }
-?>
