@@ -273,7 +273,7 @@ abstract class Repo
                     } else if (isset($this->columnArr[strtolower($filter->column)])) {
                         $loweredKey = strtolower($filter->column);
                         $paramKey = isset($filter->placeholderOverride) && strlen($filter->placeholderOverride) ? $filter->placeholderOverride : $loweredKey . $depth . $index;
-                        $sql .= $loweredKey . $filter->operator . ":$paramKey";
+                        $sql .= "$loweredKey " . $filter->operator . " :$paramKey";
                         $params[$paramKey] = gettype($filter->value) === 'boolean' ? ($filter->value ? 1 : 0) : $filter->value;
                         $addedFilters = true;
                     }
