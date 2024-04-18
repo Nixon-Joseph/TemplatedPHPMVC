@@ -225,7 +225,7 @@ abstract class Repo
                     $sql .= " DESC";
                 }
             }
-            $offset = ($page - 1) * $pageSize;
+            $offset = intval(($page - 1) * $pageSize);
             $sql .= " LIMIT $offset, $pageSize";
             $results = $this->_query($sql, $params);
             $totalRecords = $this->_getCount($filters);
