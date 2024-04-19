@@ -25,6 +25,11 @@ class TemplateMVCApp
      */
     public $LiquidFilters;
 
+    /**
+     * @var callable
+     */
+    public $BuildMenusCallback;
+
     private $_controllerName;
     private $_actionName;
     private $_routeParams;
@@ -61,6 +66,7 @@ class TemplateMVCApp
         $this->_area = $area;
         $this->_viewDirectory = $viewDirectory;
         $this->LiquidFilters = array();
+        $this->BuildMenusCallback = function ($area): ?array { return null; };
     }
 
     /**
@@ -180,10 +186,10 @@ class TemplateMVCApp
      * @param array $menus
      * @return void
      */
-    public function Start(string $viewsPath, string $fileNotFoundControllerName, array $siteData = null, array $menus = null)
+    public function Start(string $viewsPath, string $fileNotFoundControllerName, array $siteData = null)
     {
         try {
-            $this->Menus = $menus;
+            $this->Menus = array();
             define("VIEWS_PATH", $viewsPath);
 
             if (isset($siteData) && count($siteData) > 0) {
@@ -191,6 +197,10 @@ class TemplateMVCApp
             }
             
             define('AREA', $this->_area);
+
+            if (isset($this->BuildMenusCallback)) {
+                $this->Menus = ($this->BuildMenusCallback)(AREA);
+            }
 
             $controllerPath = $this->controllerPath;
             if (AREA != null && strlen(AREA) > 0) {
