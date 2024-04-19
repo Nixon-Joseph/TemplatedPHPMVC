@@ -164,6 +164,8 @@ class TemplateMVCApp
     {
         try {
             $this->sessionName = $sessionId;
+            session_name($this->sessionName);
+            session_start();
         } catch (\Exception $e) {
             echo 'Connection error: ' . $e->getMessage();
         }
@@ -187,9 +189,7 @@ class TemplateMVCApp
             if (isset($siteData) && count($siteData) > 0) {
                 define("SITE_DATA", $siteData);
             }
-
-            session_name($this->sessionName);
-            session_start();
+            
             define('AREA', $this->_area);
 
             $controllerPath = $this->controllerPath;
