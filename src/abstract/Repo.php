@@ -512,6 +512,22 @@ abstract class Repo
             return ResponseInfo::Error($th->getMessage());
         }
     }
+
+    /**
+    * Returns the full Column String with the given prefix (use for when you have to alias the table)
+    *
+    * @param string $prefix
+    * @return string
+    */
+    public function GetPrefixedColumns(string $prefix): string
+    {
+        $prefixedColumns = array();
+        $cols = explode(",", $this->columnString);
+        foreach ($cols as $value) {
+            $prefixedColumns[] = "$prefix.$value as $value";
+        }
+        return implode(",", $prefixedColumns);
+    }
 }
 
 class QueryFilter
