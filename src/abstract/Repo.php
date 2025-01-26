@@ -3,7 +3,8 @@
 namespace devpirates\MVC\Base;
 
 use devpirates\MVC\GUIDHelper;
-use \devpirates\MVC\ResponseInfo;
+use devpirates\MVC\ResponseInfo;
+use devpirates\MVC\TemplateMVCApp;
 
 abstract class Repo
 {
@@ -56,9 +57,14 @@ abstract class Repo
      */
     protected $db;
 
-    protected function __construct(string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null)
+    /**
+     * @var TemplateMVCApp
+     */
+    protected $app;
+
+    protected function __construct(TemplateMVCApp $app, string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null)
     {
-        global $app;
+        $this->app = $app;
         $this->db = $app->DB;
         $this->className = $class;
         $this->idColumn = strtolower($idCol);
@@ -85,6 +91,9 @@ abstract class Repo
                 $className = $this->className;
                 $obj = new $className();
             } catch (\Throwable $th) {
+                if (isset($this->app->logger)) {
+                    $this->app->logger->Error("Repo::$this->table::setColumnString", "Error: " . $th->getMessage());
+                }
             }
             if (isset($obj) && is_object($obj)) { // if the object exists
                 $reflect = new \ReflectionClass($obj); // build reflection object
@@ -142,6 +151,9 @@ abstract class Repo
                 return ResponseInfo::Error("Failed to execute statement");
             }
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_execute", "Error: " . $th->getMessage());
+            }
             return ResponseInfo::Error($th->getMessage());
         }
     }
@@ -161,6 +173,9 @@ abstract class Repo
             $objs = $statement->fetchAll(\PDO::FETCH_CLASS, $this->className);
             return array_map($this->fixPDOMapping, $objs);
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_query", "Error: " . $th->getMessage());
+            }
             return null;
         }
     }
@@ -232,6 +247,9 @@ abstract class Repo
 
             return array("results" => array_map($this->fixPDOMapping, $results), "totalRecords" => $totalRecords, "pages" => ceil($totalRecords / $pageSize));
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_getAllPaged", "Error: " . $th->getMessage());
+            }
             return null;
         }
     }
@@ -308,6 +326,9 @@ abstract class Repo
             $statement->execute($params);
             return $statement->fetchColumn();
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_getCount", "Error: " . $th->getMessage());
+            }
             return -1;
         }
     }
@@ -328,6 +349,9 @@ abstract class Repo
             $object = $statement->fetch();
             return ($this->fixPDOMapping)($object);
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_getById", "Error: " . $th->getMessage());
+            }
             return null;
         }
     }
@@ -348,6 +372,9 @@ abstract class Repo
             $objs = $statement->fetchAll(\PDO::FETCH_CLASS, $this->className);
             return array_map($this->fixPDOMapping, $objs);
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_getByIds", "Error: " . $th->getMessage());
+            }
             return null;
         }
     }
@@ -402,6 +429,9 @@ abstract class Repo
                     throw new \Exception("Invalid object");
                 }
             } catch (\Throwable $th) {
+                if (isset($this->app->logger)) {
+                    $this->app->logger->Error("Repo::$this->table::_insert", "Error: " . $th->getMessage());
+                }
                 return ResponseInfo::Error($th->getMessage());
             }
         } else {
@@ -475,6 +505,9 @@ abstract class Repo
                     throw new \Exception("Invalid object");
                 }
             } catch (\Throwable $th) {
+                if (isset($this->app->logger)) {
+                    $this->app->logger->Error("Repo::$this->table::_update", "Error: " . $th->getMessage());
+                }
                 return ResponseInfo::Error($th->getMessage());
             }
         } else {
@@ -506,9 +539,15 @@ abstract class Repo
             if ($statement->rowCount() > 0) {
                 return ResponseInfo::Success();
             } else {
+                if (isset($this->app->logger)) {
+                    $this->app->logger->Info("Repo::$this->table::_insert", "No rows deleted, id: $id");
+                }
                 return ResponseInfo::Error("Failed to delete requested item");
             }
         } catch (\Throwable $th) {
+            if (isset($this->app->logger)) {
+                $this->app->logger->Error("Repo::$this->table::_delete", "Error: " . $th->getMessage());
+            }
             return ResponseInfo::Error($th->getMessage());
         }
     }

@@ -23,50 +23,6 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase
     }
 
     /**
-     * This method throttles the passed in work to allow for rate limiting to help stop DDOS or brute force attacks
-     *
-     * @param string $throttleName
-     * @param integer $timesPer
-     * @param integer $minutes
-     * @param callable $method
-     * @param mixed|null $callableParams
-     * @return void
-     */
-    protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, $callableParams = null): void
-    {
-        if (isset($_SESSION["Throttle-$throttleName"])) {
-            $throttle = json_decode($_SESSION["Throttle-$throttleName"]);
-        } else {
-            $throttle = new ThrottleDescriptor();
-        }
-        $okayToRun = false;
-        if (isset($throttle->FirstAccess)) {
-            if (Time() - $throttle->FirstAccess > ($minutes * 60)) {
-                $okayToRun = true;
-                $throttle->FirstAccess = time();
-                $throttle->AccessCount = 0;
-            } else if ($throttle->AccessCount < $timesPer) {
-                $okayToRun = true;
-            }
-        } else {
-            $okayToRun = true;
-            $throttle->FirstAccess = time();
-        }
-        $throttle->AccessCount++;
-        $_SESSION["Throttle-$throttleName"] = json_encode($throttle);
-        if ($okayToRun === true) {
-            if (isset($callableParams)) {
-                $method($callableParams);
-            } else {
-                $method();
-            }
-        } else {
-            $this->setResponseStatus(\devpirates\MVC\HttpStatusCode::TOO_MANY_REQUESTS);
-            echo "Too many requests, please wait a bit and try again.";
-        }
-    }
-
-    /**
      * This method ends the current client request, but allows your code to continue executing.
      * Use this to kick off a 'threaded' process where you don't want the client to wait for a single response
      *
@@ -131,16 +87,5 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase
         // (CGI, a web server, etc). This attempts to push current output all the way
         // to the browser with a few caveats.
         flush();
-    }
-}
-
-class ThrottleDescriptor
-{
-    public $AccessCount;
-    public $FirstAccess;
-
-    public function __construct()
-    {
-        $this->AccessCount = 0;
     }
 }

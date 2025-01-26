@@ -2,12 +2,16 @@
 
 namespace devpirates\MVC;
 
+use devpirates\MVC\Base\ControllerResponse;
+use devpirates\MVC\Interfaces\ILogger;
+use devpirates\MVC\Interfaces\IThrottle;
+use devpirates\MVC\SessionThrottle;
+
 /**
  * @author nieminen <nieminen432@gmail.com>
  */
 class TemplateMVCApp
 {
-    private $config = [];
     /**
      * @var \PDO
      */
@@ -35,9 +39,20 @@ class TemplateMVCApp
     private $_routeParams;
     private $_area;
     private $_viewDirectory;
+    /**
+     * Returns the registered throttling implementation.
+     * 
+     * @var callable
+     */
+    private $throttleGetter;
+    /**
+     * @var ?ILogger
+     */
+    public $logger;
 
-    public function __construct(?string $templateExtension = "haml", ?string $cacheLoc = null)
+    public function __construct(?string $templateExtension = "haml", ?string $cacheLoc = null, ?ILogger $logger = null)
     {
+        $this->logger = $logger;
         define("TEMPLATE_EXTENSION", $templateExtension);
         define('REQUEST_GET', $this->cleanseParams($_GET));
         $postObjJson = file_get_contents("php://input");
@@ -67,15 +82,17 @@ class TemplateMVCApp
         $this->_viewDirectory = $viewDirectory;
         $this->LiquidFilters = array();
         $this->BuildMenusCallback = function ($area): ?array { return null; };
+        $self = $this;
+        $this->throttleGetter = function () use ($self): ?IThrottle { return new SessionThrottle($self); };
     }
 
     /**
      * This cleans up the get and post parameters to help prevent XSS.
      *
      * @param array $arr
-     * @return void
+     * @return mixed
      */
-    private function cleanseParams(array $arr)
+    private function cleanseParams(array $arr): mixed
     {
         $params = [];
         foreach ($arr as $key => $value) {
@@ -149,14 +166,16 @@ class TemplateMVCApp
     {
         try {
             $this->ConfigSession($sessionId);
-            $this->sessionName = $sessionId;
             $this->DB = new \PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->DB->query('SET NAMES utf8');
 
             // TODO: Remove for production
             // $this->DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (\PDOException $e) {
-            echo 'Connection error: ' . $e->getMessage();
+            // echo 'Connection error: ' . $e->getMessage();
+            if (isset($this->logger)) {
+                $this->logger->Error("TemplateMVCApp::Config", "Connection error: " . $e->getMessage());
+            }
         }
     }
 
@@ -173,8 +192,22 @@ class TemplateMVCApp
             session_name($this->sessionName);
             session_start();
         } catch (\Exception $e) {
-            echo 'Connection error: ' . $e->getMessage();
+            if (isset($this->logger)) {
+                $this->logger->Error("TemplateMVCApp::ConfigSession", "Connection error: " . $e->getMessage());
+            }
         }
+    }
+
+    /**
+     * Register a function to get the throttle implementation.
+     * Must return an instance of IThrottle.
+     *
+     * @param callable $throttleCallback
+     * @return void
+     */
+    public function RegisterThrottleImplementation(callable $throttleCallback)
+    {
+        $this->throttleGetter = $throttleCallback;
     }
 
     /**
@@ -207,16 +240,17 @@ class TemplateMVCApp
                 $controllerPath .= "/" . AREA;
             }
 
-            $fnfControllerFunc = function ($fnfControllerName) {
+            $self = $this;
+            $fnfControllerFunc = function ($fnfControllerName) use ($self) {
                 $this->_actionName = 'index';
                 $this->_routeParams = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
                 $this->_viewDirectory = 'filenotfound';
-                return new $fnfControllerName();
+                return new $fnfControllerName($self);
             };
 
             $filePath = fileExists("$controllerPath/" . $this->_controllerName . '.php', false);
             if ($filePath) {
-                $controller = new $this->_controllerName();
+                $controller = new $this->_controllerName($this);
                 if (method_exists($controller, $this->_actionName) === false) {
                     $controller = $fnfControllerFunc($fileNotFoundControllerName);
                 }
@@ -227,12 +261,23 @@ class TemplateMVCApp
             define("ROUTE_PARAMS", $this->_routeParams);
             define("CONTROLLER_NAME", $this->_controllerName);
             define('VIEW_DIRECTORY', $this->_viewDirectory);
-            call_user_func_array(array($controller, $this->_actionName), !empty($this->_routeParams) ? explode('/', $this->_routeParams) : []);
+            $controllerResp = call_user_func_array(array($controller, $this->_actionName), !empty($this->_routeParams) ? explode('/', $this->_routeParams) : []);
+            $resp = null;
+            if ($controllerResp instanceof ControllerResponse) {
+                $resp = $controllerResp;
+            } else {
+                $resp = new ControllerResponse($controllerResp, 200);
+            }
+            http_response_code($resp->statusCode);
+            echo $resp->output;
         } catch (\Throwable $th) {
             // echo "<pre>";
             // var_dump($th);
             // echo "</pre>";
             // die();
+            if (isset($this->logger)) {
+                $this->logger->Error("TemplateMVCApp::Start", "Error: " . $th->getMessage());
+            }
             http_response_code(HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
@@ -245,8 +290,44 @@ class TemplateMVCApp
             },
             "fingerprint" => function (string $resourcePath, string $relativePath = "./", string $paramName = 'x') {
                 return Files::Fingerprint($resourcePath, $relativePath, $paramName);
+            },
+            "number" => function ($amount, $decimals = 2) {
+                return number_format($amount, $decimals);
+            },
+            "booltotext" => function (bool $value, string $trueText = "Yes", string $falseText = "No") {
+                return $value ? $trueText : $falseText;
+            },
+            "slugify" => function ($text, string $divider = '-') {
+                // replace non letter or digits by divider
+                $text = preg_replace('~[^\pL\d]+~u', $divider, $text);
+                // transliterate
+                $text = iconv('utf-8', 'us-ascii//TRANSLIT', $text);
+                // remove unwanted characters
+                $text = preg_replace('~[^-\w]+~', '', $text);
+                // trim
+                $text = trim($text, $divider);
+                // remove duplicate divider
+                $text = preg_replace('~-+~', $divider, $text);
+                // lowercase
+                $text = strtolower($text);
+
+                if (empty($text)) {
+                    return 'n-a';
+                }
+
+                return $text;
             }
         );
+    }
+
+    /**
+     * This method returns the throttle implementation to be used.
+     *
+     * @return IThrottle
+     */
+    public function GetThrottler(): IThrottle
+    {
+        return ($this->throttleGetter)();
     }
 }
 

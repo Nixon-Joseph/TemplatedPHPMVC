@@ -2,6 +2,8 @@
 
 namespace devpirates\MVC\Base;
 
+use devpirates\MVC\TemplateMVCApp;
+
 abstract class Helper
 {
     /**
@@ -9,9 +11,14 @@ abstract class Helper
      */
     protected $db;
 
-    public function __construct()
+    /*
+    * @var \TemplateMVCApp
+    */
+    protected $app;
+
+    public function __construct(TemplateMVCApp $app)
     {
-        global $app;
+        $this->app = $app;
         $this->db = $app->DB;
     }
 }

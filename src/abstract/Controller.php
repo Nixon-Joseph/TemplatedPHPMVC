@@ -2,43 +2,30 @@
 
 namespace devpirates\MVC\Base;
 
-use zz\Html\HTMLMinify;
+use devpirates\MVC\TemplateMVCApp;
 
-abstract class Controller extends \devpirates\MVC\Base\ControllerBase
+/**
+ * Base controller class
+ * All controllers should extend this class
+ * Controller classes should be named as [ControllerName]Controller
+ * For example: HomeController
+ * 
+ * Controller constructor now requires TemplateMVCApp object to eliminate global variable use
+ * @package devpirates\MVC\Base
+ */
+abstract class Controller extends ControllerBase
 {
     protected $pageTitle;
     protected $pageName;
     protected $scripts = array();
     protected $styles = array();
 
-    private $params = array();
-
-    public abstract function Index();
-
-    /**
-     * Handles output caching controller action
-     *
-     * @param string $key
-     * @param callable $viewFunc
-     * @param integer $expiresInSeconds
-     * @return void
-     */
-    protected function outputCache(string $key, callable $viewFunc, int $expiresInSeconds = 120)
+    public function __construct(TemplateMVCApp $app)
     {
-        if (isset($this->cache)) {
-            $cachedOutput = $this->cache->GetOutputCache($key);
-            if (isset($cachedOutput) && strlen($cachedOutput) > 0) {
-                echo $cachedOutput;
-            } else {
-                $output = $viewFunc();
-                $this->cache->SetOutputCache($key, $expiresInSeconds, $output);
-                echo $output;
-            }
-        } else {
-            echo $viewFunc();
-        }
+        parent::__construct($app);
     }
 
+    public abstract function Index();
 
     /**
      * Display partial view for controller action
@@ -48,12 +35,13 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
      * @param string $view
      * @param array|null $viewData
      * @param boolean $minify
-     * @return string
+     * @return ControllerResponse
      */
-    protected function partial(string $view, $model = null, ?array $viewData = null, bool $minify = true): void
+    protected function partial(string $view, $model = null, ?array $viewData = null, bool $minify = true): ControllerResponse
     {
-        echo $this->getView($model, $view, null, $viewData, $minify);
+        return $this->ok($this->getView($model, $view, null, $viewData, $minify));
     }
+
 
     /**
      * Get partial view for controller action
@@ -70,6 +58,7 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
         return $this->getView($model, $view, null, $viewData, $minify);
     }
 
+
     /**
      * Display view for controller action
      * If array is passed in as $model, it should be ['key' => 'value'] format
@@ -79,11 +68,11 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
      * @param string $master
      * @param array|null $viewData
      * @param boolean $minify
-     * @return void
+     * @return ControllerResponse
      */
-    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): void
+    protected function view($model = null, string $view = ACTION_NAME, string $master = "_layout", ?array $viewData = null, bool $minify = true): ControllerResponse
     {
-        echo $this->getView($model, $view, $master, $viewData, $minify);
+        return $this->ok($this->getView($model, $view, $master, $viewData, $minify));
     }
 
     /**
@@ -97,19 +86,14 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
      * @param boolean $minify
      * @return string
      */
-    protected function getView($model = null, string $view = ACTION_NAME, $master = "_layout", ?array $viewData = null, bool $minify = true): string
+    protected function getView($model = null, string $view = ACTION_NAME, $master = "_layout", ?array $viewData = null): string
     {
         \Liquid\Liquid::set('INCLUDE_ALLOW_EXT', true);
 
         $viewPath = strlen(AREA) ? (VIEWS_PATH . "/areas/" . AREA) : VIEWS_PATH;
         $template = new \Liquid\Template($viewPath);
 
-        /**
-         * @global \devpirates\MVC\TemplateMVCApp
-         */
-        global $app;
-
-        $allFilters = array_merge($app->GetBaseLiquidFilters(), isset($app->LiquidFilters) ? $app->LiquidFilters : array());
+        $allFilters = array_merge($this->app->GetBaseLiquidFilters(), isset($this->app->LiquidFilters) ? $this->app->LiquidFilters : array());
         if (isset($allFilters) && count($allFilters)) {
             foreach ($allFilters as $key => $value) {
                 $template->registerFilter($key, $value);
@@ -134,7 +118,7 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
                 'content' => $pageContent,
                 'siteData' => SITE_DATA,
                 'viewData' => $viewData,
-                'menus' => $app->Menus,
+                'menus' => $this->app->Menus,
                 'scripts' => $this->scripts,
                 'styles' => $this->styles
             ));
@@ -142,9 +126,6 @@ abstract class Controller extends \devpirates\MVC\Base\ControllerBase
             $output = $pageContent;
         }
 
-        // if ($minify) {
-        //     $output = HTMLMinify::minify($output);
-        // }
         return $output;
     }
 }
