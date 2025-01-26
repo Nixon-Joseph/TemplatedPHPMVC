@@ -30,40 +30,19 @@ abstract class ControllerBase
         exit;
     }
 
-    protected function ok(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::OK);
-    }
+    abstract protected function ok(mixed $output = null) : ControllerResponse;
 
-    protected function notFound(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::NOT_FOUND);
-    }
+    abstract protected function notFound(mixed $output = null) : ControllerResponse;
 
-    protected function badRequest(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::BAD_REQUEST);
-    }
+    abstract protected function badRequest(mixed $output = null) : ControllerResponse;
 
-    protected function unauthorized(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::UNAUTHORIZED);
-    }
+    abstract protected function unauthorized(mixed $output = null) : ControllerResponse;
 
-    protected function forbidden(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::FORBIDDEN);
-    }
+    abstract protected function forbidden(mixed $output = null) : ControllerResponse;
 
-    protected function internalServerError(?string $output = null) : ControllerResponse
-    {
-        return new ControllerResponse($output, HttpStatusCode::INTERNAL_SERVER_ERROR);
-    }
+    abstract protected function internalServerError(mixed $output = null) : ControllerResponse;
 
-    protected function response(?string $output = null, int $statusCode) : ControllerResponse
-    {
-        return new ControllerResponse($output, $statusCode);
-    }
+    abstract protected function response(mixed $output = null, int $statusCode) : ControllerResponse;
 
     /**
      * Handles output caching controller action

@@ -2,6 +2,8 @@
 
 namespace devpirates\MVC\Base;
 
+use devpirates\MVC\HttpStatusCode;
+
 abstract class ApiController extends \devpirates\MVC\Base\ControllerBase
 {
     /**
@@ -10,16 +12,51 @@ abstract class ApiController extends \devpirates\MVC\Base\ControllerBase
      * 
      * @param string|object $data
      * @param integer $responseCode
-     * @return void
+     * @return string
      */
-    protected function respond($data): void
+    private function respond(mixed $data): string
     {
         header('Content-Type: application/json');
         if (isset($data) && $data !== null) {
-            echo json_encode($data);
+            return json_encode($data);
         } else {
-            echo 'null';
+            return 'null';
         }
+    }
+
+    protected function ok(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::OK);
+    }
+
+    protected function notFound(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::NOT_FOUND);
+    }
+
+    protected function badRequest(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::BAD_REQUEST);
+    }
+
+    protected function unauthorized(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::UNAUTHORIZED);
+    }
+
+    protected function forbidden(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::FORBIDDEN);
+    }
+
+    protected function internalServerError(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), HttpStatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    protected function response(mixed $output = null, int $statusCode) : ControllerResponse
+    {
+        return new ControllerResponse($this->respond($output), $statusCode);
     }
 
     /**

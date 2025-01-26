@@ -2,6 +2,7 @@
 
 namespace devpirates\MVC\Base;
 
+use devpirates\MVC\HttpStatusCode;
 use devpirates\MVC\TemplateMVCApp;
 
 /**
@@ -26,6 +27,41 @@ abstract class Controller extends ControllerBase
     }
 
     public abstract function Index();
+
+    protected function ok(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::OK);
+    }
+
+    protected function notFound(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::NOT_FOUND);
+    }
+
+    protected function badRequest(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::BAD_REQUEST);
+    }
+
+    protected function unauthorized(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::UNAUTHORIZED);
+    }
+
+    protected function forbidden(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::FORBIDDEN);
+    }
+
+    protected function internalServerError(mixed $output = null) : ControllerResponse
+    {
+        return new ControllerResponse($output, HttpStatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    protected function response(mixed $output = null, int $statusCode) : ControllerResponse
+    {
+        return new ControllerResponse($output, $statusCode);
+    }
 
     /**
      * Display partial view for controller action
