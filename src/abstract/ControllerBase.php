@@ -75,7 +75,7 @@ abstract class ControllerBase
      * @param callable $method
      * @param mixed|null $callableParams
      * @param mixed|null $additionalInfo
-     * @return void
+     * @return ControllerResponse
      */
     protected function throttle(string $throttleName, int $timesPer, int $minutes, callable $method, $callableParams = null, mixed $additionalInfo = null): ControllerResponse
     {

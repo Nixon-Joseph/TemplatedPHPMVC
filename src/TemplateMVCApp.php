@@ -209,7 +209,7 @@ class TemplateMVCApp
      * @param callable $throttleCallback
      * @return void
      */
-    public function RegisterThrottleImplementation(callable $throttleCallback)
+    public function RegisterThrottleImplementation(callable $throttleCallback) : void
     {
         $this->throttleGetter = $throttleCallback;
     }
@@ -221,7 +221,7 @@ class TemplateMVCApp
      * @param callable $outputCacheCallback
      * @return void
      */
-    public function RegisterOutputCacheImplementation(callable $outputCacheCallback)
+    public function RegisterOutputCacheImplementation(callable $outputCacheCallback) : void
     {
         $this->outputCacheGetter = $outputCacheCallback;
     }
@@ -362,9 +362,9 @@ class TemplateMVCApp
     /**
      * This method returns the Output Cache implementation to be used as a singleton
      *
-     * @return IOutputCache
+     * @return IOutputCache | null
      */
-    public function GetOutputCacher(): IOutputCache
+    public function GetOutputCacher(): ?IOutputCache
     {
         if ($this->outputCacher === null) {
             $this->outputCacher = ($this->outputCacheGetter)($this->logger);

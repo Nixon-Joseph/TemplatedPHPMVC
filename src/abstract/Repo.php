@@ -62,6 +62,15 @@ abstract class Repo
      */
     protected $app;
 
+    /**
+     * Constructor
+     * @param TemplateMVCApp $app
+     * @param string $class
+     * @param bool|null $generateGuidsForIds
+     * @param string $idCol
+     * @param string|null $table - if not provided, will be set to lowercase class name + s
+     * @param array|null $columnArr
+     */
     protected function __construct(TemplateMVCApp $app, string $class, ?bool $generateGuidsForIds = false, string $idCol = "uid", string $table = null, ?array $columnArr = null)
     {
         $this->app = $app;
@@ -69,8 +78,11 @@ abstract class Repo
         $this->className = $class;
         $this->idColumn = strtolower($idCol);
         $this->generateGuidsForIds = $generateGuidsForIds;
-        $this->table = isset($table) ? $table : $class . 's';
-        $this->table = strtolower($this->table);
+        if (!empty($table)) {
+            $this->table = $table;
+        } else {
+            $this->table = strtolower($class . 's');
+        }
         $this->setColumnString($columnArr);
         $this->fixPDOMapping = function (?object $entity): ?object {
             return $entity;
