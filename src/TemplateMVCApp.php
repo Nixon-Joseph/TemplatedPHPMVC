@@ -57,9 +57,9 @@ class TemplateMVCApp
      */
     public $logger;
 
-    public function __construct(?string $templateExtension = "haml", ?ILogger $logger = null)
+    public function __construct(?string $templateExtension = "haml")
     {
-        $this->logger = $logger;
+        $this->logger = null;
         define("TEMPLATE_EXTENSION", $templateExtension);
         define('REQUEST_GET', $this->cleanseParams($_GET));
         $postObjJson = file_get_contents("php://input");
@@ -89,6 +89,11 @@ class TemplateMVCApp
         $this->BuildMenusCallback = function ($area): ?array { return null; };
         $this->throttleGetter = function (TemplateMVCApp $app) : ?IThrottle { return new SessionThrottle($app); };
         $this->outputCacheGetter = function (?ILogger $logger) : ?IOutputCache { return null; };
+    }
+
+    public function SetLogger(ILogger $logger)
+    {
+        $this->logger = $logger;
     }
 
     /**
