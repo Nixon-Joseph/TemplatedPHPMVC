@@ -2,8 +2,6 @@
 
 namespace devpirates\MVC\Interfaces;
 
-use devpirates\MVC\Base\ControllerResponse;
-
 interface IThrottle
 {
     /**
