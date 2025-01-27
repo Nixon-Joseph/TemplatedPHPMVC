@@ -17,7 +17,7 @@
         "psr-4": { 
             "devpirates\\MVC\\": "src/",
             "devpirates\\MVC\\Base\\": "src/abstract/",
-            "devpirates\\MVC\\Interface\\": "src/interfaces/"
+            "devpirates\\MVC\\Interfaces\\": "src/interfaces/"
         }
     },
     "require": { 
