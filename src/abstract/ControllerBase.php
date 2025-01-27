@@ -8,7 +8,7 @@ use devpirates\MVC\TemplateMVCApp;
 abstract class ControllerBase
 {
     /**
-     * @var \devpirates\MVC\Cache
+     * @var IOutputCache | null
      */
     protected $cache;
     /**
@@ -18,9 +18,7 @@ abstract class ControllerBase
 
     public function __construct(TemplateMVCApp $app)
     {
-        if (CACHE_LOC != null && strlen(CACHE_LOC) > 0) {
-            $this->cache = new \devpirates\MVC\Cache(CACHE_LOC);
-        }
+        $this->cache = $app->GetOutputCacher();
         $this->app = $app;
     }
 
@@ -54,7 +52,7 @@ abstract class ControllerBase
      */
     protected function outputCache(string $key, callable $viewFunc, int $expiresInSeconds = 120, int $statusCode = 200): ControllerResponse
     {
-        if (isset($this->cache)) {
+        if (!empty($this->cache)) {
             $cachedOutput = $this->cache->GetOutputCache($key);
             if (isset($cachedOutput) && strlen($cachedOutput) > 0) {
                 return new ControllerResponse($cachedOutput, $statusCode);

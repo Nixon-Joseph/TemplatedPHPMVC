@@ -2,12 +2,17 @@
 
 namespace devpirates\MVC;
 
-class Cache
-{
-    private $cacheLoc;
+use devpirates\MVC\Interfaces\ILogger;
+use devpirates\MVC\Interfaces\IOutputCache;
 
-    public function __construct(string $cacheLoc)
+class FileOutputCache implements IOutputCache
+{
+    private readonly string $cacheLoc;
+    private readonly ILogger $logger;
+
+    public function __construct(string $cacheLoc, ?ILogger $logger)
     {
+        $this->logger = $logger;
         $this->cacheLoc = $cacheLoc;
         if (!file_exists($cacheLoc)) {
             mkdir($cacheLoc);
@@ -34,21 +39,32 @@ class Cache
                         unlink($filename);
                     }
                 } catch (\Throwable $th) {
-                    // delete file
-                    unlink($filename);
+                    if (isset($this->logger)) {
+                        $this->logger->Error("FileOutputCache::GetOutputCache", "Error: " . $th->getMessage());
+                    }
+                    try {
+                        unlink($filename);
+                    } catch (\Throwable $th) {
+                        if (isset($this->logger)) {
+                            $this->logger->Error("FileOutputCache::GetOutputCache unlink", "Error: " . $th->getMessage());
+                        }   
+                    }
                 }
             }
         }
         return null;
     }
 
-    public function SetOutputCache(string $key, int $secondsToLive, string $contents)
+    public function SetOutputCache(string $key, int $secondsToLive, string $contents) : void
     {
         $filename = $this->getOutputCacheFilename($key);
         try {
             $cacheFile = fopen($filename, 'w');
             fwrite($cacheFile, new OutputCacheObject($contents, time() + $secondsToLive));
         } catch (\Throwable $th) {
+            if (isset($this->logger)) {
+                $this->logger->Error("FileOutputCache::SetOutputCache", "Error: " . $th->getMessage());
+            }
         } finally {
             fclose($cacheFile);
         }
@@ -56,20 +72,32 @@ class Cache
 
     public function ClearOutputCache(string $key): bool
     {
-        $filename = $this->getOutputCacheFilename($key);
-        if (file_exists($filename)) {
-            return unlink($filename);
+        try {
+            $filename = $this->getOutputCacheFilename($key);
+            if (file_exists($filename)) {
+                return unlink($filename);
+            }
+        } catch (\Throwable $th) {
+            if (isset($this->logger)) {
+                $this->logger->Error("FileOutputCache::ClearOutputCache", "Error: " . $th->getMessage());
+            }
         }
         return false;
     }
 
     public function ClearAllOutputCache(): bool
     {
-        if ($dir = opendir($this->cacheLoc)) {
-            while (($file = readdir($dir)) !== false) {
-                if (unlink($file) === false) {
-                    return false;
+        try {
+            if ($dir = opendir($this->cacheLoc)) {
+                while (($file = readdir($dir)) !== false) {
+                    if (unlink($file) === false) {
+                        return false;
+                    }
                 }
+            }
+        } catch (\Throwable $th) {
+            if (isset($this->logger)) {
+                $this->logger->Error("FileOutputCache::GetOutputCache", "Error: " . $th->getMessage());
             }
         }
         return true;

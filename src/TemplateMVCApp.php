@@ -4,6 +4,7 @@ namespace devpirates\MVC;
 
 use devpirates\MVC\Base\ControllerResponse;
 use devpirates\MVC\Interfaces\ILogger;
+use devpirates\MVC\Interfaces\IOutputCache;
 use devpirates\MVC\Interfaces\IThrottle;
 use devpirates\MVC\SessionThrottle;
 
@@ -46,11 +47,17 @@ class TemplateMVCApp
      */
     private $throttleGetter;
     /**
+     * returns the registered output cache implementation
+     * 
+     * @var callable
+     */
+    private $outputCacheGetter;
+    /**
      * @var ?ILogger
      */
     public $logger;
 
-    public function __construct(?string $templateExtension = "haml", ?string $cacheLoc = null, ?ILogger $logger = null)
+    public function __construct(?string $templateExtension = "haml", ?ILogger $logger = null)
     {
         $this->logger = $logger;
         define("TEMPLATE_EXTENSION", $templateExtension);
@@ -62,8 +69,6 @@ class TemplateMVCApp
             $postArr = $decoded ? $decoded : [];
         }
         define('REQUEST_POST', $this->cleanseParams(array_merge($_POST, $postArr)));
-
-        define("CACHE_LOC", $cacheLoc);
 
         $area = isset(REQUEST_GET["Area"]) && !empty(REQUEST_GET["Area"]) ? REQUEST_GET["Area"] : "";
         $controllerName = isset(REQUEST_GET["Controller"]) && !empty(REQUEST_GET["Controller"]) ? REQUEST_GET["Controller"] : "home";
@@ -82,8 +87,8 @@ class TemplateMVCApp
         $this->_viewDirectory = $viewDirectory;
         $this->LiquidFilters = array();
         $this->BuildMenusCallback = function ($area): ?array { return null; };
-        $self = $this;
-        $this->throttleGetter = function () use ($self): ?IThrottle { return new SessionThrottle($self); };
+        $this->throttleGetter = function (TemplateMVCApp $app) : ?IThrottle { return new SessionThrottle($app); };
+        $this->outputCacheGetter = function (?ILogger $logger) : ?IOutputCache { return null; };
     }
 
     /**
@@ -162,10 +167,9 @@ class TemplateMVCApp
      * @param string $sessionId
      * @return void
      */
-    public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass, string $sessionId = "SID")
+    public function Config(string $dbServer, string $dbName, string $dbUser, string $dbPass)
     {
         try {
-            $this->ConfigSession($sessionId);
             $this->DB = new \PDO("mysql:host=$dbServer;dbname=$dbName", $dbUser, $dbPass);
             $this->DB->query('SET NAMES utf8');
 
@@ -208,6 +212,18 @@ class TemplateMVCApp
     public function RegisterThrottleImplementation(callable $throttleCallback)
     {
         $this->throttleGetter = $throttleCallback;
+    }
+
+    /**
+     * Register a function to get the Output Cache implementation.
+     * Must return an instance of IOutputCache.
+     *
+     * @param callable $outputCacheCallback
+     * @return void
+     */
+    public function RegisterOutputCacheImplementation(callable $outputCacheCallback)
+    {
+        $this->outputCacheGetter = $outputCacheCallback;
     }
 
     /**
@@ -321,13 +337,39 @@ class TemplateMVCApp
     }
 
     /**
-     * This method returns the throttle implementation to be used.
+     * @var IThrottle
+     */
+    private $throttler = null;
+
+    /**
+     * This method returns the throttle implementation to be used as a singleton
      *
      * @return IThrottle
      */
     public function GetThrottler(): IThrottle
     {
-        return ($this->throttleGetter)();
+        if ($this->throttler === null) {
+            $this->throttler = ($this->throttleGetter)($this);
+        }
+        return $this->throttler;
+    }
+
+    /**
+     * @var IOutputCache
+     */
+    private $outputCacher = null;
+
+    /**
+     * This method returns the Output Cache implementation to be used as a singleton
+     *
+     * @return IOutputCache
+     */
+    public function GetOutputCacher(): IOutputCache
+    {
+        if ($this->outputCacher === null) {
+            $this->outputCacher = ($this->outputCacheGetter)($this->logger);
+        }
+        return $this->outputCacher;
     }
 }
 
